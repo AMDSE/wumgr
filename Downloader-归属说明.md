@@ -1,6 +1,6 @@
 # Downloader 3.1.2 归属与许可
 
-本项目随 v5 使用 **Downloader 3.1.2** 的 `net462/Downloader.dll`，用于多线程 HTTP 下载。该库不是本项目原创，来源如下：
+本项目使用 **Downloader 3.1.2** 的 `net462/Downloader.dll`，用于多线程 HTTP 下载。该库不是本项目原创，来源如下：
 
 - 上游源码：<https://github.com/bezzad/Downloader/tree/v3.1.2>
 - NuGet：<https://www.nuget.org/packages/Downloader/3.1.2>

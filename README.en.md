@@ -34,7 +34,7 @@ These are captures of the actual WinForms application running under Linux / Mono
 3. Scan for drivers, verify the model and version, choose a folder, and download. Use device search to inspect exact matches.
 4. Only if installation is intended, run as administrator, explicitly enable silent installation, and review the confirmation. The app does not auto-elevate or restart the computer, and protection is off by default.
 
-The package includes the executable, corresponding source, bilingual documentation, previews, test output and SHA-256 manifest. The [v5 package](WuMgr-驱动下载中心-v5.zip) remains available for rollback.
+The package includes the executable, corresponding source, bilingual documentation, previews, test output and SHA-256 manifest.
 
 ## Language switching
 
