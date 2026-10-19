@@ -37,6 +37,8 @@ if [[ -f tests/ServiceTests.cs ]]; then
 fi
 mcs -langversion:7.2 -r:wumgr/bin/Release/wumgr.exe -r:System.Core -out:wumgr/bin/Release/DeviceTests.exe tests/DeviceTests.cs
 mono wumgr/bin/Release/DeviceTests.exe
+mcs -langversion:7.2 -r:wumgr/bin/Release/wumgr.exe -r:System.Core -out:wumgr/bin/Release/EnumerationTests.exe tests/EnumerationTests.cs
+mono wumgr/bin/Release/EnumerationTests.exe
 mcs -langversion:7.2 -r:wumgr/bin/Release/wumgr.exe -r:System.Core -out:wumgr/bin/Release/InstallerTests.exe tests/InstallerTests.cs
 mono wumgr/bin/Release/InstallerTests.exe
 mcs -langversion:7.2 -r:System.Core -out:wumgr/bin/Release/PolicyTests.exe wumgr/DriverUpdatePolicy.cs tests/PolicyTests.cs

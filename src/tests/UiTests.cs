@@ -85,6 +85,35 @@ class UiTests
                 Check(!Field<CheckBox>(f, "silentInstall").Checked && Field<Button>(f, "deviceSearch").Enabled && Field<Button>(f, "autoDownload").Enabled && Field<Button>(f, "policyButton").Enabled, "默认仅下载且新功能入口可见");
                 Field<CheckBox>(f, "silentInstall").Checked = true;
                 Check(Field<Button>(f, "download").Text == "下载并静默安装", "安装勾选同步主操作文案");
+                f.Show(); Application.DoEvents();
+                var local = Field<List<LocalDeviceInfo>>(f, "localDevices");
+                local.AddRange(new[] {
+                    new LocalDeviceInfo { InstanceId = "GPU", Name = "测试显卡", Class = "Display", HardwareIds = new List<string> { "PCI\\VEN_TEST&DEV_GPU" } },
+                    new LocalDeviceInfo { InstanceId = "AUDIO", Name = "测试声卡", Class = "MEDIA" },
+                    new LocalDeviceInfo { InstanceId = "NET", Name = "测试网卡", Class = "Net" },
+                    new LocalDeviceInfo { InstanceId = "BT", Name = "测试蓝牙", Class = "Bluetooth" },
+                    new LocalDeviceInfo { InstanceId = "CHIP", Name = "测试芯片组", Class = "System" },
+                    new LocalDeviceInfo { InstanceId = "UNKNOWN", Name = "未知设备", ProblemCode = 28 }
+                });
+                Refresh(f);
+                var inventoryList = Field<FlowLayoutPanel>(f, "list");
+                Check(inventoryList.Controls.Count == 6, "无更新候选时主界面仍列出全部六类设备");
+                Check(Field<Label>(f, "total").Text.StartsWith("6 个设备"), "设备计数基于真实清单而不是更新数");
+                Field<Button>(f, "selectAll").PerformClick();
+                Check(Field<HashSet<string>>(f, "selected").Count == 0, "无候选设备不能全选成假驱动");
+                var inventoryTabs = ((IList)f.GetType().GetField("tabs", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(f)).Cast<Button>().ToList();
+                foreach (string label in new[] { "显卡", "声卡", "网络适配器", "蓝牙", "系统设备", "其他设备" }) {
+                    inventoryTabs.First(t => t.Text == label).PerformClick();
+                    Check(inventoryList.Controls.Count == 1, label + "类别即使无更新也能查看");
+                }
+                inventoryTabs.First(t => t.Text == "全部设备").PerformClick();
+                Field<List<DriverInfo>>(f, "drivers").Add(new DriverInfo { Id = "gpu-update", DeviceModel = "显卡候选", HardwareId = "PCI\\VEN_TEST&DEV_GPU", DriverClass = "Display", Version = "2.0", DownloadUrls = new List<string> { "https://example.invalid/gpu.cab" } });
+                Refresh(f);
+                Check(inventoryList.Controls.Count == 6 && inventoryList.Controls.Cast<Control>().Count(c => c.GetType().Name == "DriverCard") == 1, "只有一项更新也不隐藏其余五个设备");
+                Field<TextBox>(f, "search").Text = "测试蓝牙"; Application.DoEvents();
+                Check(inventoryList.Controls.Count == 1, "无候选设备也支持名称搜索");
+                f.Close();
+
             }
             using (var picker = new DeviceSearchForm(new List<LocalDeviceInfo> { new LocalDeviceInfo { Name = "测试网卡", HardwareIds = new List<string> { "PCI\\VEN_TEST" }, InstalledVersion = "1.0" } }, new List<DriverInfo> { new DriverInfo { Id = "test", DeviceModel = "测试网卡", HardwareId = "pci\\ven_test", Version = "2.0", DownloadUrls = new List<string> { "https://example.invalid/test.cab" } } }))
             {
