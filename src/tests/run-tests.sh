@@ -31,6 +31,12 @@ xvfb-run -a -s '-screen 0 1440x1100x24' mono wumgr/bin/Release/UiTests.exe
 mcs -langversion:7.2 -r:wumgr/bin/Release/wumgr.exe -r:System.Windows.Forms -r:System.Drawing -r:System.Core -out:wumgr/bin/Release/LanguageTests.exe tests/LanguageTests.cs
 xvfb-run -a -s '-screen 0 1440x1100x24' mono wumgr/bin/Release/LanguageTests.exe
 mono wumgr/bin/Release/CatalogTests.exe
+mcs -langversion:7.2 -r:wumgr/bin/Release/wumgr.exe -r:System.Windows.Forms -r:System.Drawing -r:System.Core -out:wumgr/bin/Release/LayoutTests.exe tests/LayoutTests.cs
+xvfb-run -a -s '-screen 0 1440x1100x24' mono wumgr/bin/Release/LayoutTests.exe
+mcs -langversion:7.2 -r:wumgr/bin/Release/wumgr.exe -r:System.Windows.Forms -r:System.Drawing -r:System.Core -out:wumgr/bin/Release/ModernControlsTests.exe tests/ModernControlsTests.cs
+xvfb-run -a -s '-screen 0 1440x1100x24' mono wumgr/bin/Release/ModernControlsTests.exe
+mcs -langversion:7.2 -r:wumgr/bin/Release/wumgr.exe -r:System.Core -out:wumgr/bin/Release/PerformanceTests.exe tests/PerformanceTests.cs
+mono wumgr/bin/Release/PerformanceTests.exe
 if [[ -f tests/ServiceTests.cs ]]; then
   mcs -langversion:7.2 -r:wumgr/bin/Release/wumgr.exe -r:System.Net.Http -r:System.Core -out:wumgr/bin/Release/ServiceTests.exe tests/ServiceTests.cs
   mono wumgr/bin/Release/ServiceTests.exe
