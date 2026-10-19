@@ -74,7 +74,10 @@ namespace wumgr
             int ordinal = 0;
             foreach (var item in inventory)
             {
-                var ordered = DeviceDiscovery.Match(item, available).OrderByDescending(d => IsDirect(item, d))
+                // Match() 保持原有匹配语义；直接匹配排序所需的硬件 ID 集合只为设备建立一次。
+                // 旧实现 IsDirect 为每个候选重新构造 HashSet，在设备/候选较多时产生大量短命对象。
+                var directIds = new HashSet<string>(item.HardwareIds ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
+                var ordered = DeviceDiscovery.Match(item, available).OrderByDescending(d => IsDirect(directIds, d))
                     .ThenByDescending(d => ParseVersion(d.Version)).ThenByDescending(d => d.DriverDate)
                     .ThenBy(d => d.Id, StringComparer.OrdinalIgnoreCase).ToList();
                 var entry = new DriverDevice("local|" + (String.IsNullOrWhiteSpace(item.InstanceId) ? "ordinal:" + ordinal : item.InstanceId.Trim().ToUpperInvariant()), ordered.FirstOrDefault() ?? new DriverInfo()) {
@@ -86,9 +89,8 @@ namespace wumgr
             }
             return entries;
         }
-        static bool IsDirect(LocalDeviceInfo device, DriverInfo candidate)
+        static bool IsDirect(HashSet<string> ids, DriverInfo candidate)
         {
-            var ids = new HashSet<string>(device.HardwareIds ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
             return (candidate.HardwareId ?? "").Split(';').Any(x => ids.Contains(x.Trim()));
         }
         static Version ParseVersion(string text) { Version v; return Version.TryParse(text, out v) ? v : new Version(0, 0); }

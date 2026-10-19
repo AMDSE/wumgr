@@ -74,6 +74,8 @@ namespace wumgr
         }
         public static void Apply(Control root)
         {
+            var caption = root.Tag as LocalizedCaption;
+            if (caption != null) root.Text = T(caption.Zh, caption.En);
             // TextBox contents belong to the user (search and paths), not to localization.
             if (!(root is TextBoxBase) && !(root is LocalizedStatusLabel) && !String.IsNullOrEmpty(root.Text)) root.Text = Get(root.Text);
             if (!String.IsNullOrEmpty(root.AccessibleName)) root.AccessibleName = Get(root.AccessibleName);

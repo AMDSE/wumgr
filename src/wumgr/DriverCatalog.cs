@@ -84,12 +84,13 @@ namespace wumgr
             }
 
             var afterIds = new List<DriverInfo>();
+            var validUrls = new Dictionary<DriverInfo, List<string>>();
             foreach (var pair in byId)
             {
                 // WUA identity is UpdateID + RevisionNumber. A new revision replaces
                 // the old metadata; never mix payload URLs from different revisions.
                 var chosen = pair.Value.OrderByDescending(d => d.RevisionNumber)
-                    .ThenByDescending(d => ValidUrls(d).Any()).First();
+                    .ThenByDescending(d => HasValidUrl(d, validUrls)).First();
                 if (chosen.DownloadUrls == null) chosen.DownloadUrls = new List<string>();
                 afterIds.Add(chosen);
             }
@@ -101,7 +102,7 @@ namespace wumgr
             foreach (var d in afterIds)
             {
                 if (d.DownloadUrls == null) d.DownloadUrls = new List<string>();
-                string payload = SemanticKey(d);
+                string payload = SemanticKey(d, validUrls);
                 if (payload == null) { result.Add(d); continue; }
                 DriverInfo existing;
                 if (!byPayload.TryGetValue(payload, out existing))
@@ -114,11 +115,16 @@ namespace wumgr
             return result;
         }
 
-        private static string SemanticKey(DriverInfo d)
+        private static string SemanticKey(DriverInfo d, Dictionary<DriverInfo, List<string>> validUrls)
         {
             // Missing metadata or no valid payload makes a semantic merge unsafe.
             if (Missing(d.Id) || Missing(d.HardwareId)) return null;
-            List<string> urls = ValidUrls(d).ToList();
+            List<string> urls;
+            if (!validUrls.TryGetValue(d, out urls))
+            {
+                urls = ValidUrls(d).ToList();
+                validUrls.Add(d, urls);
+            }
             if (urls.Count == 0) return null;
             return TupleKey(d, true) + LengthPrefix(d.Version) + LengthPrefix(d.DriverDate.Ticks.ToString(CultureInfo.InvariantCulture))
                 + LengthPrefix(String.Join(";", urls.OrderBy(x => x, StringComparer.Ordinal)));
@@ -134,6 +140,17 @@ namespace wumgr
         private static IEnumerable<string> ValidUrls(DriverInfo d)
         {
             return (d.DownloadUrls ?? new List<string>()).Select(CanonicalUrl).Where(x => x != null).Distinct(StringComparer.Ordinal);
+        }
+
+        private static bool HasValidUrl(DriverInfo d, Dictionary<DriverInfo, List<string>> validUrls)
+        {
+            List<string> urls;
+            if (!validUrls.TryGetValue(d, out urls))
+            {
+                urls = ValidUrls(d).ToList();
+                validUrls.Add(d, urls);
+            }
+            return urls.Count > 0;
         }
 
         private static string CanonicalUrl(string value)

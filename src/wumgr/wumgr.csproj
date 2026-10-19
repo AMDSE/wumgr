@@ -29,7 +29,7 @@
     <Reference Include="System.Management"/><Reference Include="Microsoft.CSharp"/>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DriverProgram.cs"/><Compile Include="UiLanguage.cs"/><Compile Include="UiStrings.cs"/><Compile Include="DriverForm.cs"/>
+    <Compile Include="DriverProgram.cs"/><Compile Include="UiLanguage.cs"/><Compile Include="UiStrings.cs"/><Compile Include="DriverForm.cs"/><Compile Include="DriverForm.Layout.cs"/><Compile Include="ModernControls.cs"/>
     <Compile Include="DriverUpdatePolicy.cs"/><Compile Include="DriverInstaller.cs"/><Compile Include="DeviceDiscovery.cs"/><Compile Include="SetupApiDeviceSource.cs"/><Compile Include="DeviceInventory.cs"/><Compile Include="LocalDeviceCard.cs"/><Compile Include="DeviceSearchForm.cs"/>
     <Compile Include="DriverDownloader.cs"/><Compile Include="DriverInfo.cs"/><Compile Include="DriverCatalog.cs"/><Compile Include="DriverService.cs"/>
     <Compile Include="Properties\AssemblyInfo.cs"/>

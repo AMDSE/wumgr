@@ -32,6 +32,9 @@ namespace wumgr
             Controls.Add(title); Controls.Add(category); Controls.Add(installed); Controls.Add(metadata); Controls.Add(note); Controls.Add(details);
             tip.SetToolTip(title, device.Name + "\n" + device.InstanceId);
             tip.SetToolTip(installed, installed.Text); tip.SetToolTip(metadata, metadata.Text); tip.SetToolTip(note, note.Text);
+            // Cards are created after Form autoscaling (scan/filter); scale fresh controls explicitly.
+            using (var graphics = Graphics.FromHwnd(IntPtr.Zero))
+                if (Math.Abs(graphics.DpiX - 96F) > 0.5F) Scale(new SizeF(graphics.DpiX / 96F, graphics.DpiY / 96F));
         }
         protected override void Dispose(bool disposing) { if (disposing) tip.Dispose(); base.Dispose(disposing); }
     }
