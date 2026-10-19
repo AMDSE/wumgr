@@ -1,3 +1,7 @@
+> **v10 Preview — clean rounded controls and modern checkboxes.** Removes rectangular corner surfaces/native outer borders, refreshes checkbox and history radio styling while keeping native keyboard and selection behavior. Local preview only; not pushed to GitHub. Windows/high-DPI acceptance pending. See [v10 notes](更新说明-v10-preview.md).
+
+> **v9 Preview — UI refresh and staged modernization.** Sidebar categories, responsive command area, Ctrl+F / Escape / F5, cached hardware inventory for filtering, and reduced repeated URL / hardware-ID work. Still native WinForms + .NET Framework 4.8. Linux/Mono regression tests only; Windows and high-DPI acceptance pending. This local preview does not replace the published v8 release. See [v9 preview notes](更新说明-v9-preview.md).
+
 > v8: the main list shows common detected hardware and installed driver version/provider/date even without updates. Virtual devices, endpoint noise and duplicate CPU cores are hidden here; Device search retains the full inventory. Windows hardware acceptance is pending.
 
 # WuMgr Driver Download Center · v8
@@ -38,7 +42,7 @@ These are captures of the actual WinForms application running under Linux / Mono
 3. Scan for drivers, verify the model and version, choose a folder, and download. Use device search to inspect exact matches.
 4. Only if installation is intended, run as administrator, explicitly enable silent installation, and review the confirmation. The app does not auto-elevate or restart the computer, and protection is off by default.
 
-The package includes the executable, corresponding source, bilingual documentation, previews, test output and SHA-256 manifest. [Previous Releases](https://github.com/AMDSE/wumgr/releases) remain available for rollback.
+The package includes the executable, corresponding source, bilingual documentation, previews, test output and SHA-256 manifest. The [v5 package](WuMgr-驱动下载中心-v5.zip) remains available for rollback.
 
 ## Language switching
 
@@ -63,26 +67,24 @@ Changing language in the UI saves the preference. Preview mode uses safe demo da
 
 **Protection is limited.** The Microsoft [ExcludeWUDriversInQualityUpdate policy](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-update#excludewudriversinqualityupdate) excludes drivers from routine quality updates without disabling security updates. It does not guarantee blocking feature-update drivers, manual changes or vendor tools. It applies system-wide, can be overridden by organizational policy, and is not promised to work on Home editions. Relevant original values are backed up for restoration.
 
-**Validation covers Linux / Mono automated tests and demo rendering only.** Real Windows WMI/WUA, Microsoft CDN downloads, elevation and effective policy behavior still require on-device acceptance testing. See the [Windows checklist ](src/tests/Windows验收清单.md) and [v8 test log](最终测试日志-v8.txt).
+**Validation covers Linux / Mono automated tests and demo rendering only.** Real Windows WMI/WUA, Microsoft CDN downloads, elevation and effective policy behavior still require on-device acceptance testing. See the [Windows checklist](tests/Windows验收清单.md) and [v8 test log](最终测试日志-v8.txt).
 
 ## Build and test
 
 On Windows, install Visual Studio 2022 with the .NET desktop workload and .NET Framework 4.8 targeting pack, then run:
 
 ```bat
-cd src
 build-windows.cmd
 ```
 
 The script restores pinned Downloader 3.1.2 with NuGet CLI if needed. On Linux / Mono, for tests and demo rendering only:
 
 ```bash
-cd src
 bash tests/run-tests.sh
 python3 package-release.py
 ```
 
-The repository entry point is `src/wumgr/DriverProgram.cs`; tests are in `src/tests/`. Packaging excludes NuGet caches, generated `bin/obj` directories and test executables from the source tree.
+The entry point is `wumgr/DriverProgram.cs`; tests are in `tests/`. Packaging excludes NuGet caches, generated `bin/obj` directories and test executables from the source tree.
 
 ## License and attribution
 

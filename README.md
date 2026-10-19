@@ -1,3 +1,9 @@
+> **下载 V10**：[WinForms V10 预览完整包](https://github.com/AMDSE/wumgr/releases/tag/v10.0.0-preview)。V8 仍为稳定版，WPF 版本另行开发。
+
+> **v10 预览版：圆角去方框、现代复选框。** 修复控件圆角外的矩形底色与原生外框，统一绿色圆角复选框和历史版本单选框，保留原生键盘/选择语义。已发布为 GitHub 预览版，Windows 实机及高 DPI 验收待完成。详见 [v10 说明](更新说明-v10-preview.md)。
+
+> **v9 预览版：界面重构与渐进优化。** 新增侧栏分类、自适应操作区、Ctrl+F / Escape / F5；筛选复用已匹配快照，减少 URL 和硬件 ID 重复处理。保留原生 WinForms + .NET Framework 4.8，尚待 Windows 实机及高 DPI 验收。预览版不替换稳定版 v8，详见[预览版说明](更新说明-v9-preview.md)。下方 v8 功能与安全边界继续适用。
+
 > v8：主界面列出常见硬件及已安装驱动版本、提供商、日期，没有更新也保留；过滤虚拟设备、音频端点、系统杂项和重复逻辑核心。完整原始清单仍在“设备搜索”。详见 [更新说明-v8](更新说明-v8.md)。Windows 实机验收待完成。
 
 # WuMgr 驱动下载中心 · v8
@@ -38,7 +44,7 @@
 3. 点击「扫描设备驱动」，核对设备型号和版本，选择保存目录后下载。也可以进入「设备搜索」查看精确匹配。
 4. 若确需安装，先右键「以管理员身份运行」，勾选「下载后后台静默安装」并阅读确认提示。程序不自动提权、不自动重启，默认也不开启更新保护。
 
-[历史 Releases](https://github.com/AMDSE/wumgr/releases) 保留旧版完整包，便于回退。v8 包含程序、完整对应源码、双语 README、界面预览、测试日志和 SHA-256 清单。
+[v5 旧版完整包](WuMgr-驱动下载中心-v5.zip) 仍保留，便于回退。v8 包含程序、完整对应源码、双语 README、界面预览、测试日志和 SHA-256 清单。
 
 ## 中英文切换
 
@@ -63,26 +69,24 @@ wumgr.exe --preview preview-en.png --lang en-US
 
 **保护不是全面拦截。** 使用微软 [ExcludeWUDriversInQualityUpdate 策略](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-update#excludewudriversinqualityupdate)，仅排除常规质量更新中的驱动，不关闭安全更新；不能保证拦截功能更新、手动安装或厂商工具。全机生效，组织策略可能覆盖，家庭版不承诺生效。开启前备份相关原值，可通过界面恢复。
 
-**验证范围：Linux / Mono 自动化测试与演示截图；Windows 真实 WMI、WUA、微软 CDN、管理员权限和策略生效仍待实机验收。** 不应据此把程序视为已完成 Windows 生产环境验证。参见 [Windows 验收清单](src/tests/Windows验收清单.md) 和 [测试日志](最终测试日志-v8.txt)。
+**验证范围：Linux / Mono 自动化测试与演示截图；Windows 真实 WMI、WUA、微软 CDN、管理员权限和策略生效仍待实机验收。** 不应据此把程序视为已完成 Windows 生产环境验证。参见 [Windows 验收清单](tests/Windows验收清单.md) 和 [测试日志](最终测试日志-v8.txt)。
 
 ## 构建与测试
 
 Windows：安装 Visual Studio 2022「.NET 桌面开发」及 .NET Framework 4.8 目标包，在源码根目录执行：
 
 ```bat
-cd src
 build-windows.cmd
 ```
 
 脚本在缺包时通过 NuGet CLI 还原固定的 Downloader 3.1.2。Linux / Mono 仅用于测试与演示：
 
 ```bash
-cd src
 bash tests/run-tests.sh
 python3 package-release.py
 ```
 
-仓库源码目录 `src/wumgr/`，入口 `DriverProgram.cs`；自动化用例在 `src/tests/`。打包脚本不会把 NuGet 缓存、`bin/obj` 或测试 EXE 混入源码。
+源码目录 `wumgr/`，入口 `DriverProgram.cs`；自动化用例在 `tests/`。打包脚本不会把 NuGet 缓存、`bin/obj` 或测试 EXE 混入源码。
 
 ## 许可与来源
 

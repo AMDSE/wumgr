@@ -1,3 +1,7 @@
+> **v10 预览版：圆角去方框、现代复选框。** 修复控件圆角外的矩形底色与原生外框，统一绿色圆角复选框和历史版本单选框，保留原生键盘/选择语义。仍为本地预览，未推送 GitHub，Windows 实机及高 DPI 验收待完成。详见 [v10 说明](更新说明-v10-preview.md)。
+
+> **v9 预览版：界面重构与渐进优化。** 新增侧栏分类、自适应操作区、Ctrl+F / Escape / F5；筛选复用已匹配快照，减少 URL 和硬件 ID 重复处理。保留原生 WinForms + .NET Framework 4.8，尚待 Windows 实机及高 DPI 验收。本地预览不替换已发布 v8，详见[预览版说明](更新说明-v9-preview.md)。下方 v8 功能与安全边界继续适用。
+
 > v8：主界面列出常见硬件及已安装驱动版本、提供商、日期，没有更新也保留；过滤虚拟设备、音频端点、系统杂项和重复逻辑核心。完整原始清单仍在“设备搜索”。详见 [更新说明-v8](更新说明-v8.md)。Windows 实机验收待完成。
 
 # WuMgr 驱动下载中心 · 中英文版 v8
@@ -28,11 +32,11 @@
 
 ## 驱动更新保护
 
-采用微软“Windows 更新不包括驱动程序”策略，仅排除常规质量更新周期中的驱动包；安全／关键更新、功能更新动态驱动、手动安装及厂商工具不在保证范围内。设置作用于全机，组织策略／MDM仍可能覆盖。详见 [项目首页的保护边界](README.md#安全边界与已知限制)。
+采用微软“Windows 更新不包括驱动程序”策略，仅排除常规质量更新周期中的驱动包；安全／关键更新、功能更新动态驱动、手动安装及厂商工具不在保证范围内。设置作用于全机，组织策略／MDM仍可能覆盖。详见 v4 说明中的保护边界。
 
 ## 构建与验证
 
-Windows：安装 Visual Studio 2022“.NET 桌面开发”及 .NET Framework 4.8 目标包，在仓库 `src/` 目录执行 `build-windows.cmd`。脚本在缺少本地包时使用 NuGet CLI 还原固定的 Downloader 3.1.2；不允许漂移到其他版本。Linux／Mono 可执行 `bash tests/run-tests.sh`，脚本会校验本地包哈希并编译运行 `tests/DownloaderTests.cs` 及现有测试。
+Windows：安装 Visual Studio 2022“.NET 桌面开发”及 .NET Framework 4.8 目标包，执行 `build-windows.cmd`。脚本在缺少本地包时使用 NuGet CLI 还原固定的 Downloader 3.1.2；不允许漂移到其他版本。Linux／Mono 可执行 `bash tests/run-tests.sh`，脚本会校验本地包哈希并编译运行 `tests/DownloaderTests.cs` 及现有测试。
 
 **Linux 仅用于自动化测试；Windows 真实 WMI、WUA 扫描／安装、微软 CDN、管理员权限及策略实际生效仍需实机验收。** `--demo`／`--preview` 使用演示数据，扫描、下载、安装、策略修改均禁用。
 
