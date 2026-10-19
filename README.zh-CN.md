@@ -1,8 +1,10 @@
-# WuMgr 驱动下载中心 · 中英文版 v6
+> v7 修复设备枚举与重复驱动：新增原生 SetupAPI 清单，设备不再因无更新而消失；蓝牙/系统设备独立分类，同包候选去重并保留真实历史版本。Linux/Mono 下 181 项自动化测试全部通过，Windows 实机验收仍待完成。[更新说明](更新说明-v7.md)。
+
+# WuMgr 驱动下载中心 · 中英文版 v7
 
 基于 [DavidXanatos/wumgr](https://github.com/DavidXanatos/wumgr) 的独立修改版，不是上游官方发布。当前以驱动中心为入口，不包含上游旧版完整更新管理界面。支持中英文界面、驱动型号／版本、历史候选选择与下载、设备自动发现、匹配下载、可选后台静默安装和驱动更新保护。
 
-[项目首页与双语运行截图](README.md) · [English](README.en.md) · [下载 v6](WuMgr-驱动下载中心-v6.zip)
+[项目首页与双语运行截图](README.md) · [English](README.en.md) · [下载 v7](WuMgr-驱动下载中心-v7.zip)
 
 ## 中英文切换
 

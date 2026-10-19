@@ -1,8 +1,10 @@
-# WuMgr 驱动下载中心 · v6
+> v7 修复设备枚举与重复驱动：新增原生 SetupAPI 清单，设备不再因无更新而消失；蓝牙/系统设备独立分类，同包候选去重并保留真实历史版本。Linux/Mono 下 181 项自动化测试全部通过，Windows 实机验收仍待完成。[更新说明](更新说明-v7.md)。
+
+# WuMgr 驱动下载中心 · v7
 
 **设备驱动搜索、历史候选选择、多线程下载，以及可选的静默安装。现在支持简体中文 / English 即时切换。**
 
-[English](README.en.md) · [中文详细说明](README.zh-CN.md) · [下载 v6 完整包](WuMgr-驱动下载中心-v6.zip) · [v6 更新说明](更新说明-v6.md)
+[English](README.en.md) · [中文详细说明](README.zh-CN.md) · [下载 v7 完整包](WuMgr-驱动下载中心-v7.zip) · [v7 更新说明](更新说明-v7.md)
 
 这是基于 [DavidXanatos/wumgr](https://github.com/DavidXanatos/wumgr) 的独立修改版，**不是上游官方发布**。当前可执行程序以驱动下载中心为入口，不包含上游旧版完整 Windows 更新管理界面。
 
@@ -29,7 +31,7 @@
 
 ## 下载与运行
 
-1. [下载 `WuMgr-驱动下载中心-v6.zip`](WuMgr-驱动下载中心-v6.zip)，完整解压，不要直接在压缩包内运行。
+1. [下载 `WuMgr-驱动下载中心-v7.zip`](WuMgr-驱动下载中心-v7.zip)，完整解压，不要直接在压缩包内运行。
 2. 在 **Windows 10 / 11** 打开 `程序\wumgr.exe`；需要 **.NET Framework 4.8**、Windows 更新服务与网络。
 3. 点击「扫描设备驱动」，核对设备型号和版本，选择保存目录后下载。也可以进入「设备搜索」查看精确匹配。
 4. 若确需安装，先右键「以管理员身份运行」，勾选「下载后后台静默安装」并阅读确认提示。程序不自动提权、不自动重启，默认也不开启更新保护。
@@ -59,7 +61,7 @@ wumgr.exe --preview preview-en.png --lang en-US
 
 **保护不是全面拦截。** 使用微软 [ExcludeWUDriversInQualityUpdate 策略](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-update#excludewudriversinqualityupdate)，仅排除常规质量更新中的驱动，不关闭安全更新；不能保证拦截功能更新、手动安装或厂商工具。全机生效，组织策略可能覆盖，家庭版不承诺生效。开启前备份相关原值，可通过界面恢复。
 
-**验证范围：Linux / Mono 自动化测试与演示截图；Windows 真实 WMI、WUA、微软 CDN、管理员权限和策略生效仍待实机验收。** 不应据此把程序视为已完成 Windows 生产环境验证。参见 [Windows 验收清单](Windows验收清单.md) 和 [测试日志](最终测试日志-v6.txt)。
+**验证范围：Linux / Mono 自动化测试与演示截图；Windows 真实 WMI、WUA、微软 CDN、管理员权限和策略生效仍待实机验收。** 不应据此把程序视为已完成 Windows 生产环境验证。参见 [Windows 验收清单](Windows验收清单.md) 和 [测试日志](最终测试日志-v7.txt)。
 
 ## 构建与测试
 

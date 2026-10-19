@@ -1,8 +1,10 @@
-# WuMgr Driver Download Center · v6
+> v7 fixes device enumeration and duplicate drivers: native SetupAPI inventory, independent device visibility, Bluetooth/system categories, and safe candidate deduplication. 181 automated tests passed under Linux/Mono; Windows hardware acceptance is still pending. [Release notes](更新说明-v7.md).
+
+# WuMgr Driver Download Center · v7
 
 **Find device drivers, choose historical candidates, download in parallel, and optionally install silently. Now with instant Simplified Chinese / English switching.**
 
-[简体中文](README.md) · [Download v6](WuMgr-驱动下载中心-v6.zip) · [Detailed Chinese guide](README.zh-CN.md)
+[简体中文](README.md) · [Download v7](WuMgr-驱动下载中心-v7.zip) · [Detailed Chinese guide](README.zh-CN.md)
 
 This is an independent modification of [DavidXanatos/wumgr](https://github.com/DavidXanatos/wumgr), **not an official upstream release**. The current executable opens the driver center; it does not include the upstream legacy full Windows update-management UI.
 
@@ -29,7 +31,7 @@ These are captures of the actual WinForms application running under Linux / Mono
 
 ## Download and run
 
-1. [Download the complete v6 ZIP](WuMgr-驱动下载中心-v6.zip) and extract it fully.
+1. [Download the complete v7 ZIP](WuMgr-驱动下载中心-v7.zip) and extract it fully.
 2. On **Windows 10 / 11**, open `程序\wumgr.exe`. **.NET Framework 4.8**, Windows Update services and network access are required.
 3. Scan for drivers, verify the model and version, choose a folder, and download. Use device search to inspect exact matches.
 4. Only if installation is intended, run as administrator, explicitly enable silent installation, and review the confirmation. The app does not auto-elevate or restart the computer, and protection is off by default.
@@ -59,7 +61,7 @@ Changing language in the UI saves the preference. Preview mode uses safe demo da
 
 **Protection is limited.** The Microsoft [ExcludeWUDriversInQualityUpdate policy](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-update#excludewudriversinqualityupdate) excludes drivers from routine quality updates without disabling security updates. It does not guarantee blocking feature-update drivers, manual changes or vendor tools. It applies system-wide, can be overridden by organizational policy, and is not promised to work on Home editions. Relevant original values are backed up for restoration.
 
-**Validation covers Linux / Mono automated tests and demo rendering only.** Real Windows WMI/WUA, Microsoft CDN downloads, elevation and effective policy behavior still require on-device acceptance testing. See the [Windows checklist](Windows验收清单.md) and [v6 test log](最终测试日志-v6.txt).
+**Validation covers Linux / Mono automated tests and demo rendering only.** Real Windows WMI/WUA, Microsoft CDN downloads, elevation and effective policy behavior still require on-device acceptance testing. See the [Windows checklist](Windows验收清单.md) and [v7 test log](最终测试日志-v7.txt).
 
 ## Build and test
 
