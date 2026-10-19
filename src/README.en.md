@@ -1,3 +1,7 @@
+> **v10 Preview — clean rounded controls and modern checkboxes.** Removes rectangular corner surfaces/native outer borders, refreshes checkbox and history radio styling while keeping native keyboard and selection behavior. Local preview only; not pushed to GitHub. Windows/high-DPI acceptance pending. See [v10 notes](更新说明-v10-preview.md).
+
+> **v9 Preview — UI refresh and staged modernization.** Sidebar categories, responsive command area, Ctrl+F / Escape / F5, cached hardware inventory for filtering, and reduced repeated URL / hardware-ID work. Still native WinForms + .NET Framework 4.8. Linux/Mono regression tests only; Windows and high-DPI acceptance pending. This local preview does not replace the published v8 release. See [v9 preview notes](更新说明-v9-preview.md).
+
 > v8: the main list shows common detected hardware and installed driver version/provider/date even without updates. Virtual devices, endpoint noise and duplicate CPU cores are hidden here; Device search retains the full inventory. Windows hardware acceptance is pending.
 
 # WuMgr Driver Download Center · v8
