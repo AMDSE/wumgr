@@ -1,0 +1,15 @@
+MajorSubsystemVersion	4
+MinorSubsystemVersion	0
+Subsystem		00000002	(Windows GUI)
+Entry e 00000000 00000000 CLR Runtime Header
+	DLL Name: ADVAPI32.dll
+	DLL Name: CRYPT32.dll
+	DLL Name: GDI32.dll
+	DLL Name: KERNEL32.dll
+	DLL Name: msvcrt.dll
+	DLL Name: ole32.dll
+	DLL Name: SHELL32.dll
+	DLL Name: SHLWAPI.dll
+	DLL Name: USER32.dll
+	DLL Name: WINHTTP.dll
+	DLL Name: WINTRUST.dll

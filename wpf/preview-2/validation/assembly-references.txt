@@ -1,0 +1,2 @@
+WuMgr.Wpf Windows: mscorlib, PresentationFramework, System, WindowsBase, PresentationCore, System.Xaml, WuMgr.Core, System.Core
+WuMgr.Core Dll: mscorlib, System, Downloader, System.Xml, System.Core, System.Management, Microsoft.CSharp

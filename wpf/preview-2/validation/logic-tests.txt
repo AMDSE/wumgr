@@ -1,0 +1,83 @@
+PASS startup reads devices without a WUA search
+PASS startup reads policy without changing it
+PASS common hardware is the default category
+PASS common hardware handles localized categories
+PASS offline inventory does not invent candidates
+PASS all devices retains unknown hardware
+PASS initialization is idempotent
+PASS history choice reaches backend
+PASS only exact hardware matches get candidates
+PASS device without URLs cannot be selected
+PASS row selection updates count and command notification
+PASS hidden selection remains explicit in summary
+PASS search retains row identity and selection
+PASS provider search includes installed metadata
+PASS English labels change immediately
+PASS category names notify in English
+PASS device and candidate status translate without changing raw metadata
+PASS language changes do not mutate raw inventory
+PASS language preference is saved on both switches
+PASS detail interaction runs on UI thread
+PASS refresh devices does not silently start WUA
+PASS disposed VM disables commands
+PASS disposed operation execution is guarded
+PASS default candidate skips unsafe URL
+PASS switching to unavailable version clears selection
+PASS summary tracks selected version, not all versions
+PASS version ordering is numeric, not lexicographic
+PASS credential-bearing download URL is rejected
+PASS non-HTTP download URL is rejected
+PASS same device class or title never overrides exact ID matching
+PASS automatic selection picks applicable newer versions
+PASS automatic selection rejects superseded and older versions
+PASS automatic selection rejects unparseable candidate versions
+PASS demo initialization never touches real backend
+PASS demo scan and download buttons remain disabled
+PASS direct command execution cannot bypass demo guards
+PASS demo has no folder, shell or confirmation side effects
+PASS failed WUA query retains visible local devices
+PASS WUA error is explicit and releases busy state
+PASS language save error is logged without crashing
+PASS shell error is handled
+PASS folder chooser error is handled
+PASS standard user can download without installation
+PASS download confirmation identifies folder and exact updates
+PASS download completion reports successful count
+PASS download result refreshes row status
+PASS download confirmation returns to UI context
+PASS installation alone is blocked without administrator rights
+PASS declining separate installation confirmation prevents install
+PASS declining download confirmation has no backend side effect
+PASS partial failure installs only explicitly successful downloaded package
+PASS partial failure details remain in activity log
+PASS installation confirmation includes identities and irreversible effects
+PASS reboot requirement and per-item errors are not discarded
+PASS all installation interactions use UI thread
+PASS canceling initial folder chooser prevents download
+PASS canceling browse preserves prior directory
+PASS same-model device instances remain independently selected
+PASS shared update identity is downloaded only once
+PASS busy operation disables conflicting commands
+PASS direct execution cannot reenter busy backend or shell
+PASS material choices are frozen during operation
+PASS cancel waits for actual uninterruptible worker completion
+PASS backend ignoring cancel still cannot trigger installation
+PASS late progress cannot overwrite finished operation
+PASS next operation resets cancellation state
+PASS closing waits for actual installation result
+PASS cancel after installation preserves completed count and reboot warning
+PASS devices display while initial policy read is pending
+PASS initial policy read participates in close wait
+PASS canceled initialization ends only after policy worker returns
+PASS restore disabled when no backup exists
+PASS direct restore execution refuses absent backup
+PASS policy write alone requires administrator rights
+PASS declined policy confirmation causes no registry write
+PASS successful protection creates a restorable backup
+PASS policy confirmation states computer-wide scope
+PASS policy confirmation explains organizational limits and retained security updates
+PASS successful restore clears stale restore capability
+PASS policy read failure does not discard device inventory
+PASS failed policy read disables stale restore capability
+PASS policy dialogs remain on UI context
+Assertions: 82

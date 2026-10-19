@@ -1,4 +1,31 @@
-> **v10 预览版：圆角去方框、现代复选框。** 修复控件圆角外的矩形底色与原生外框，统一绿色圆角复选框和历史版本单选框，保留原生键盘/选择语义。仍为本地预览，未推送 GitHub，Windows 实机及高 DPI 验收待完成。详见 [v10 说明](更新说明-v10-preview.md)。
+## WPF Preview 2（与 WinForms 并存）
+
+[下载 WPF Preview 2 完整包](https://github.com/AMDSE/wumgr/releases/tag/wpf-preview-2) · [WPF 中文指南](wpf/preview-2/README-WPF.zh-CN.md) · [English guide](wpf/preview-2/README-WPF.en.md) · [独立源码](wpf/preview-2) · [SHA-256](SHA256SUMS-WPF-preview-2.txt)
+
+这是使用 XAML、原生 WPF 控件和 MVVM 协调层的新界面，共享 V10 驱动业务核心，不是嵌入 WinForms 或网页。它作为**独立预览版**发布；现有 [WinForms V10 预览版](https://github.com/AMDSE/wumgr/releases/tag/v10.0.0-preview)、`src/` 源码、历史包和 Release 均保留，**v8.0.0 继续作为 Latest 稳定版**。WPF 对应源码、构建/测试脚本及许可证单独放在 `wpf/preview-2/`，完整 ZIP 还含程序和 Windows 验收工具。下方原有界面截图属于 WinForms，不是 WPF 运行截图。
+
+### WPF 如何运行
+
+在 Windows 10/11 上完整解压 `WuMgr-WPF-preview-2.zip`，运行 **`程序\WuMgr.exe`**，保留同目录 DLL 和配置。原生启动器检查 .NET Framework 4.8+；已有环境直接启动，不需要 .NET SDK。缺少时通过 HTTPS 下载微软官方离线安装包（约 116 MiB，不随 ZIP 捆绑），校验固定 SHA-256、Authenticode 信任及微软签名者后，才请求 UAC 授权安装。需要重启时仅提示手动重启，不自动重启。自动补装范围是 Windows 10 1607+ / Windows 11 的 x86/x64；ARM64 缺环境时不自动补装。详见[运行环境说明](wpf/preview-2/RUNTIME-BOOTSTRAP.zh-CN.md)。
+
+在 `程序` 目录可先用演示数据查看界面：
+
+```powershell
+.\WuMgr.exe --demo --lang zh-CN
+.\WuMgr.exe --demo --lang en-US
+```
+
+演示模式禁用真实设备扫描、WUA、下载、安装和策略操作。正常启动只读取设备与保护策略；点击“扫描更新”才查询 WUA，默认仅下载。驱动安装或策略写入需自行以管理员身份重新打开 WPF，并逐项确认；WPF 不自动提权、不自动重启（缺环境时启动器安装运行环境的 UAC 请求除外）。程序未签名，不建议关闭系统防护绕过警告。
+
+### 预览与 Windows 实测限制
+
+已完成 .NET Framework 4.8 交叉编译和 **82 项可控后台逻辑断言**；这些不等于 Windows 实机通过。当前 Linux 构建环境没有验证真实 WPF 渲染、首次运行环境补装/UAC/重启、SetupAPI/WMI 设备枚举、WUA 扫描与安装、保护策略生效、高 DPI、多屏及辅助功能。`验收工具\运行安全验收.cmd` 提供已编译的安全演示验收工具，无需 SDK，但本次**尚未在 Windows 执行**；没有伪造 PASS 或 WPF 运行截图。首次驱动安装与策略写入请在可恢复的 Windows 测试机/虚拟机完成。
+
+源码构建需 .NET SDK 8+ 与提供 `i686-w64-mingw32-gcc` 的 x86 MinGW-w64；在 `wpf/preview-2/` 执行 `build-wpf.ps1`，再执行 `test-wpf-windows.ps1`，输出为 `dist/WuMgr-WPF`。应用运行时仍是 .NET Framework 4.8，而非 .NET 8 Desktop Runtime。
+
+---
+
+> **v10 预览版：圆角去方框、现代复选框。** 修复控件圆角外的矩形底色与原生外框，统一绿色圆角复选框和历史版本单选框，保留原生键盘/选择语义。已发布为 GitHub 预览版，Windows 实机及高 DPI 验收待完成。详见 [v10 说明](更新说明-v10-preview.md)。
 
 > **v9 预览版：界面重构与渐进优化。** 新增侧栏分类、自适应操作区、Ctrl+F / Escape / F5；筛选复用已匹配快照，减少 URL 和硬件 ID 重复处理。保留原生 WinForms + .NET Framework 4.8，尚待 Windows 实机及高 DPI 验收。本地预览不替换已发布 v8，详见[预览版说明](更新说明-v9-preview.md)。下方 v8 功能与安全边界继续适用。
 

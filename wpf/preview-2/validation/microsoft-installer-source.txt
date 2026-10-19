@@ -1,0 +1,8 @@
+Official source page: https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net48-offline-installer
+Official fwlink: https://go.microsoft.com/fwlink/?linkid=2088631
+Resolved/downloaded HTTPS URL: https://download.microsoft.com/download/f/3/a/f3a6af84-da23-40a5-8d1c-49cc10c8e76f/NDP48-x86-x64-AllOS-ENU.exe
+Downloaded bytes: 121346568
+SHA256: 0a3a390c47e639d0f7fc65b21195fee6b7f65b066f80f70c60fab191d14b7e40
+Embedded signing certificate subject extracted on Linux: /C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Corporation
+Linux osslsigncode cannot validate the Microsoft chain against this Linux trust store (unable to get local issuer certificate). This is NOT a Windows WinVerifyTrust pass. Runtime launcher requires SHA256 AND successful Windows WinVerifyTrust AND exact actual signer before executing. Windows trust/UAC/install remain untested.
+The 121 MB installer is deliberately not included in the deliverable.

@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+.vs/
+dist/
+artifacts/
+*.user
+*.suo
+*.userprefs
+*.pfx
+*.snk
+.env
+.env.*
+__pycache__/

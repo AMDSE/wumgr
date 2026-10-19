@@ -1,4 +1,31 @@
-> **v10 Preview — clean rounded controls and modern checkboxes.** Removes rectangular corner surfaces/native outer borders, refreshes checkbox and history radio styling while keeping native keyboard and selection behavior. Local preview only; not pushed to GitHub. Windows/high-DPI acceptance pending. See [v10 notes](更新说明-v10-preview.md).
+## WPF Preview 2 (alongside WinForms)
+
+[Download the complete WPF Preview 2 package](https://github.com/AMDSE/wumgr/releases/tag/wpf-preview-2) · [English WPF guide](wpf/preview-2/README-WPF.en.md) · [中文指南](wpf/preview-2/README-WPF.zh-CN.md) · [Separate source](wpf/preview-2) · [SHA-256](SHA256SUMS-WPF-preview-2.txt)
+
+A new interface using XAML, native WPF controls and an MVVM coordinator, sharing the V10 driver core—not embedded WinForms or a web page. This is a **separate prerelease**. The existing [WinForms V10 preview](https://github.com/AMDSE/wumgr/releases/tag/v10.0.0-preview), `src/` source, historical packages and releases remain intact; **v8.0.0 remains the Latest stable release**. Corresponding WPF source, build/test scripts and licenses live separately in `wpf/preview-2/`; the complete ZIP also includes the application and Windows acceptance tools. The existing interface screenshots below show WinForms, not a running WPF application.
+
+### Running WPF
+
+On Windows 10/11, fully extract `WuMgr-WPF-preview-2.zip` and run **`程序\WuMgr.exe`**, keeping the adjacent DLLs and configuration. The native launcher checks for .NET Framework 4.8+; an existing runtime starts directly and no .NET SDK is required. When missing, it downloads Microsoft's official offline installer over HTTPS (~116 MiB, not bundled), verifies the pinned SHA-256, Authenticode trust and Microsoft signer, and only then requests UAC approval to install it. Reboot-required results ask for a manual reboot; no automatic restart occurs. Automatic provisioning supports Windows 10 1607+ / Windows 11 x86/x64; it does not install a missing runtime on ARM64. See the [runtime provisioning notes (Chinese)](wpf/preview-2/RUNTIME-BOOTSTRAP.zh-CN.md).
+
+From the `程序` directory, preview synthetic data first:
+
+```powershell
+.\WuMgr.exe --demo --lang zh-CN
+.\WuMgr.exe --demo --lang en-US
+```
+
+Demo mode disables real device scanning, WUA, downloads, installation and policy operations. Normal startup only reads devices and protection policy; **Scan updates** explicitly queries WUA, and download-only is the default. Driver installation or policy writes require manually reopening WPF as administrator and reviewing specific confirmations. WPF does not automatically elevate or restart (the launcher's UAC request for a missing runtime is a separate exception). The application is unsigned; do not disable system protection to bypass warnings.
+
+### Preview and Windows validation limits
+
+.NET Framework 4.8 cross-compilation and **82 controlled-backend logic assertions** are complete; these are not Windows acceptance results. This Linux build environment has not validated real WPF rendering, first-run runtime installation/UAC/reboot, SetupAPI/WMI device enumeration, WUA scanning/installation, effective protection policy, high DPI, multiple monitors or accessibility. Precompiled safe demo acceptance tools are included at `验收工具\运行安全验收.cmd` and need no SDK, but were **not executed on Windows for this delivery**. No fabricated PASS results or WPF runtime screenshots are supplied. Use a recoverable Windows test machine/VM for initial driver-installation and policy-write tests.
+
+Building requires .NET SDK 8+ and an x86 MinGW-w64 toolchain providing `i686-w64-mingw32-gcc`. From `wpf/preview-2/`, run `build-wpf.ps1`, then `test-wpf-windows.ps1`; output is `dist/WuMgr-WPF`. The application runtime remains .NET Framework 4.8, not .NET 8 Desktop Runtime.
+
+---
+
+> **v10 Preview — clean rounded controls and modern checkboxes.** Removes rectangular corner surfaces/native outer borders, refreshes checkbox and history radio styling while keeping native keyboard and selection behavior. Published as a GitHub prerelease. Windows/high-DPI acceptance pending. See [v10 notes](更新说明-v10-preview.md).
 
 > **v9 Preview — UI refresh and staged modernization.** Sidebar categories, responsive command area, Ctrl+F / Escape / F5, cached hardware inventory for filtering, and reduced repeated URL / hardware-ID work. Still native WinForms + .NET Framework 4.8. Linux/Mono regression tests only; Windows and high-DPI acceptance pending. This local preview does not replace the published v8 release. See [v9 preview notes](更新说明-v9-preview.md).
 

@@ -1,0 +1,47 @@
+<Window x:Class="WuMgr.Wpf.Views.DeviceDetailsWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Width="780" Height="680" MinWidth="620" MinHeight="480"
+ WindowStartupLocation="CenterOwner" Background="#F5F3EF"
+ FontFamily="Segoe UI, Microsoft YaHei UI" UseLayoutRounding="True">
+ <Window.Resources>
+  <ResourceDictionary>
+   <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/WuMgr.Wpf;component/Themes/Modern.xaml" /></ResourceDictionary.MergedDictionaries>
+  </ResourceDictionary>
+ </Window.Resources>
+ <Grid Margin="24">
+  <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+  <TextBlock Text="{Binding Name}" FontSize="23" FontWeight="Bold" />
+  <Grid Grid.Row="1" Margin="0,16,0,12">
+   <Grid.ColumnDefinitions><ColumnDefinition Width="150" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+   <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+   <TextBlock x:Name="InstalledLabel" Foreground="#6D7772" Margin="0,4" /><TextBlock Grid.Column="1" Text="{Binding InstalledVersion}" FontWeight="SemiBold" Margin="0,4" />
+   <TextBlock Grid.Row="1" x:Name="ProviderLabel" Foreground="#6D7772" Margin="0,4" /><TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding InstalledProvider}" Margin="0,4" />
+   <TextBlock Grid.Row="2" x:Name="ManufacturerLabel" Foreground="#6D7772" Margin="0,4" /><TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Manufacturer}" Margin="0,4" />
+   <TextBlock Grid.Row="3" x:Name="InstanceIdLabel" Foreground="#6D7772" Margin="0,4" /><TextBox Grid.Row="3" Grid.Column="1" Text="{Binding InstanceId, Mode=OneWay}" IsReadOnly="True" Margin="0,4" Padding="5" TextWrapping="Wrap" MaxHeight="54" VerticalScrollBarVisibility="Auto" BorderBrush="#E5E1DB" />
+   <TextBlock Grid.Row="4" x:Name="HardwareIdsLabel" Foreground="#6D7772" Margin="0,4" /><TextBox Grid.Row="4" Grid.Column="1" Text="{Binding HardwareIds, Mode=OneWay}" IsReadOnly="True" Margin="0,4" Padding="5" TextWrapping="Wrap" MaxHeight="60" VerticalScrollBarVisibility="Auto" BorderBrush="#E5E1DB" />
+  </Grid>
+  <GroupBox Grid.Row="2" x:Name="AvailableVersionsGroup" Padding="8">
+   <ListBox ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion, Mode=TwoWay}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+    <ListBox.ItemTemplate>
+     <DataTemplate>
+      <Grid Margin="4,8">
+       <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+       <StackPanel Margin="0,0,10,0">
+        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+        <WrapPanel><TextBlock Text="{Binding Version}" Margin="0,3,12,0" /><TextBlock Text="{Binding Date}" Margin="0,3,12,0" Foreground="#6D7772" /><TextBlock Text="{Binding Provider}" Margin="0,3,0,0" Foreground="#6D7772" /></WrapPanel>
+        <TextBlock Text="{Binding UpdateId}" FontSize="10" Foreground="#6D7772" Margin="0,3,0,0" />
+        <TextBlock Text="{Binding Status}" FontSize="11" Foreground="#6D7772" />
+       </StackPanel>
+       <Button Grid.Column="1" Tag="{Binding}" Click="CopyUrl_Click" Loaded="CopyUrlButton_Loaded" Padding="8,5" VerticalAlignment="Top" Style="{StaticResource SecondaryButton}" />
+      </Grid>
+     </DataTemplate>
+    </ListBox.ItemTemplate>
+   </ListBox>
+  </GroupBox>
+  <WrapPanel Grid.Row="3" HorizontalAlignment="Right" Margin="0,14,0,0">
+   <Button x:Name="CopyHardwareIdsButton" Click="CopyHardwareIds_Click" Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" />
+   <Button x:Name="CloseButton" IsCancel="True" />
+  </WrapPanel>
+ </Grid>
+</Window>

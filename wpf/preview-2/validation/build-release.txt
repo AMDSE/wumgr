@@ -1,0 +1,12 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  WuMgr.Core -> /workspace/wumgr-wpf/WuMgr.Core/bin/Release/net48/WuMgr.Core.dll
+  WuMgr.Wpf.Logic -> /workspace/wumgr-wpf/tests/WuMgr.Wpf.Logic/bin/Release/net48/WuMgr.Wpf.Logic.exe
+  WuMgr.Wpf -> /workspace/wumgr-wpf/WuMgr.Wpf/bin/Release/net48/WuMgr.Wpf.exe
+  WuMgr.Wpf.Smoke -> /workspace/wumgr-wpf/tests/WuMgr.Wpf.Smoke/bin/Release/net48/WuMgr.Wpf.Smoke.exe
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.41
