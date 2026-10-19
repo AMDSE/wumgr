@@ -5,6 +5,11 @@ namespace wumgr
     {
         internal static readonly Dictionary<string, string> English = new Dictionary<string, string>
         {
+            { "无法读取本机设备：", "Cannot read local devices: " },
+            { "正在读取本机即插即用设备…", "Reading local Plug and Play devices…" },
+            { "设备扫描已降级：", "Device scan fallback: " },
+            { "本机设备已读取，更新候选扫描失败；可查看设备清单并重试", "Device inventory loaded; update search failed. You can view devices and retry." },
+            { "扫描已取消，保留已读取的设备清单", "Scan canceled; the device inventory has been kept" },
             { "\n当前驱动号：", "\nCurrent driver ID: " },
             { "\n硬件标识：", "\nHardware ID: " },
             { "\r\n\r\n安装会修改系统驱动，可能短暂断网、闪屏或需要重启。不会自动重启，不绕过系统签名检查。是否继续？", "\r\n\r\nInstallation changes system drivers and may briefly disconnect the network, flicker the display or require a restart. No automatic restart or signature-check bypass. Continue?" },
@@ -52,7 +57,7 @@ namespace wumgr
             { "Windows Update 搜索失败，结果代码：", "Windows Update search failed, result code: " },
             { "Windows 驱动更新策略的注册表值类型不受支持。", "The Windows driver update policy registry value type is unsupported." },
             { "WuMgr  /  让驱动下载，更简单", "WuMgr  /  Driver downloads, made simpler" },
-            { "WuMgr 驱动下载中心 6.0 · 中英文修改版\r\n原项目：Copyright © DavidXanatos 2018-2020\r\n上游：https://github.com/DavidXanatos/wumgr\r\n本修改版依据 GNU GPL 第 3 版发布，不提供任何担保。完整对应源码与程序一同提供。\r\n下载组件：Downloader 3.1.2 · Behzad Khosravifar · MIT\r\nhttps://github.com/bezzad/Downloader\r\n许可见 Downloader-LICENSE.txt。\r\n图标来源：Icons8，https://icons8.com，CC BY-ND 3.0。\r\n\r\n默认仅下载；可主动启用下载后后台静默安装，需管理员权限，不自动重启。可选开启驱动更新保护，仅排除质量更新中的驱动，不关闭系统安全更新。\r\n历史版本仅限 Windows 更新源返回的适用候选，无法保证完整。\r\n\r\n", "WuMgr Driver Download Center 6.0 · Bilingual modification\r\nOriginal project: Copyright © DavidXanatos 2018-2020\r\nUpstream: https://github.com/DavidXanatos/wumgr\r\nThis modification is licensed under GNU GPL version 3, without warranty. Complete corresponding source accompanies the executable.\r\nDownload component: Downloader 3.1.2 · Behzad Khosravifar · MIT\r\nhttps://github.com/bezzad/Downloader\r\nSee Downloader-LICENSE.txt.\r\nIcons: Icons8, https://icons8.com, CC BY-ND 3.0.\r\n\r\nDownload only by default. Optional silent installation requires administrator rights and never automatically restarts. Optional protection excludes drivers from quality updates without disabling security updates.\r\nVersion history is limited to applicable candidates returned by Windows Update and may be incomplete.\r\n\r\n" },
+            { "WuMgr 驱动下载中心 7.0 · 中英文修改版\r\n原项目：Copyright © DavidXanatos 2018-2020\r\n上游：https://github.com/DavidXanatos/wumgr\r\n本修改版依据 GNU GPL 第 3 版发布，不提供任何担保。完整对应源码与程序一同提供。\r\n下载组件：Downloader 3.1.2 · Behzad Khosravifar · MIT\r\nhttps://github.com/bezzad/Downloader\r\n许可见 Downloader-LICENSE.txt。\r\n图标来源：Icons8，https://icons8.com，CC BY-ND 3.0。\r\n\r\n默认仅下载；可主动启用下载后后台静默安装，需管理员权限，不自动重启。可选开启驱动更新保护，仅排除质量更新中的驱动，不关闭系统安全更新。\r\n历史版本仅限 Windows 更新源返回的适用候选，无法保证完整。\r\n\r\n", "WuMgr Driver Download Center 7.0 · Bilingual modification\r\nOriginal project: Copyright © DavidXanatos 2018-2020\r\nUpstream: https://github.com/DavidXanatos/wumgr\r\nThis modification is licensed under GNU GPL version 3, without warranty. Complete corresponding source accompanies the executable.\r\nDownload component: Downloader 3.1.2 · Behzad Khosravifar · MIT\r\nhttps://github.com/bezzad/Downloader\r\nSee Downloader-LICENSE.txt.\r\nIcons: Icons8, https://icons8.com, CC BY-ND 3.0.\r\n\r\nDownload only by default. Optional silent installation requires administrator rights and never automatically restarts. Optional protection excludes drivers from quality updates without disabling security updates.\r\nVersion history is limited to applicable candidates returned by Windows Update and may be incomplete.\r\n\r\n" },
             { "。", "." },
             { "」", "”" },
             { "一个或多个驱动下载失败。", "One or more driver downloads failed." },
@@ -77,6 +82,7 @@ namespace wumgr
             { "全选可下载", "Select all available" },
             { "全部设备", "All devices" },
             { "关于与许可", "About & licenses" },
+            { "关于与许可证", "About & licenses" },
             { "关闭", "Close" },
             { "其他设备", "Other devices" },
             { "列表最高版本 · 非安装建议", "Highest listed version · verify before installing" },

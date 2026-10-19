@@ -54,7 +54,8 @@ namespace wumgr
                 result = searcher.Search(DriverSearchCriteria);
                 int code = Convert.ToInt32(result.ResultCode); if (code != 2 && code != 3) throw new InvalidOperationException("Windows Update 搜索失败，结果代码：" + code);
                 updates = result.Updates; var output = new List<DriverInfo>(); int count = Convert.ToInt32(updates.Count);
-                for (int i = 0; i < count; i++) { token.ThrowIfCancellationRequested(); dynamic update = null; try { update = updates.Item(i); var info = ReadDriver(update); if (info != null && !output.Any(x => String.Equals(x.Id, info.Id, StringComparison.OrdinalIgnoreCase))) output.Add(info); } finally { ReleaseCom(update); } progress?.Report("已扫描 " + (i + 1) + "/" + count + " 个驱动更新。"); }
+                for (int i = 0; i < count; i++) { token.ThrowIfCancellationRequested(); dynamic update = null; try { update = updates.Item(i); var info = ReadDriver(update); if (info != null) output.Add(info); } finally { ReleaseCom(update); } progress?.Report("已扫描 " + (i + 1) + "/" + count + " 个驱动更新。"); }
+                output = DriverCatalog.NormalizeCandidates(output);
                 progress?.Report("驱动扫描完成，共发现 " + output.Count + " 个未安装驱动。"); return output;
             }
             finally { ReleaseCom(updates); ReleaseCom(result); ReleaseCom(searcher); ReleaseCom(session); }
@@ -67,7 +68,6 @@ namespace wumgr
                 if (Convert.ToInt32(Get(update, "Type")) != 2) return null;
                 var id = Text(Get(update, "Identity.UpdateID")); if (id == NotProvided) id = Text(Get(update, "UpdateID")); if (id == NotProvided) return null;
                 var info = new DriverInfo { Id = id, RevisionNumber = Get(update, "Identity.RevisionNumber") == null ? -1 : Convert.ToInt32(Get(update, "Identity.RevisionNumber")), Title = Text(Get(update, "Title")), Manufacturer = Text(Get(update, "DriverManufacturer")), Provider = Text(Get(update, "DriverProvider")), DriverClass = Text(Get(update, "DriverClass")), DeviceModel = Text(Get(update, "DriverModel")), HardwareId = HardwareText(Get(update, "DriverHardwareID")), Version = ExtractVersion(Text(Get(update, "Title"))), Superseded = Convert.ToBoolean(Get(update, "IsSuperseded") ?? false) };
-                if (info.DeviceModel == NotProvided && info.HardwareId != NotProvided) info.DeviceModel = TryFindLocalDeviceModel(info.HardwareId);
                 var date = Get(update, "DriverVerDate"); DateTime d; if (date is DateTime) info.DriverDate = (DateTime)date; else if (DateTime.TryParse(Convert.ToString(date), out d)) info.DriverDate = d;
                 info.DownloadUrls = GetDownloadUrls(update); decimal size; if (Decimal.TryParse(Convert.ToString(Get(update, "MaxDownloadSize")), out size) && size >= 0) info.Size = size;
                 info.Status = info.DownloadUrls.Count == 0 ? "无可用下载地址" : "待下载"; return info;
@@ -137,6 +137,6 @@ namespace wumgr
         private static int OverallPercent(int item, int total, int file, int files, int local) { if (total <= 0) return Math.Min(100, local); double units = Math.Min(files, file + local / 100.0); return Math.Max(0, Math.Min(100, (int)Math.Floor((item + units / Math.Max(1, files)) * 100.0 / total))); }
         private static string ExtensionFromUrl(string url) { try { var e = Path.GetExtension(new Uri(url).AbsolutePath); return String.IsNullOrWhiteSpace(e) || e.Length > 8 || e.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ? ".bin" : e; } catch { return ".bin"; } }
         private static string SafeDirectoryName(string id) { var value = String.IsNullOrWhiteSpace(id) || id == NotProvided ? "driver" : id; foreach (var c in Path.GetInvalidFileNameChars()) value = value.Replace(c, '_'); value = value.Trim().Trim('.'); if (value.Length == 0) value = "driver"; if (value.Length > 80) value = value.Substring(0, 80).Trim().Trim('.'); using (var sha = SHA256.Create()) value += "_" + BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(id ?? ""))).Replace("-", "").Substring(0, 12); return value; }
-        private static string TryFindLocalDeviceModel(string hardwareId) { dynamic locator = null, service = null, results = null; try { locator = Activator.CreateInstance(Type.GetTypeFromProgID("WbemScripting.SWbemLocator", true)); service = locator.ConnectServer(".", "root\\CIMV2"); results = service.ExecQuery("SELECT Name,PNPDeviceID,HardwareID FROM Win32_PnPEntity"); foreach (dynamic device in results) { try { var ids = HardwareText(device.HardwareID); var pnp = Convert.ToString(device.PNPDeviceID); if ((ids != null && ids.IndexOf(hardwareId, StringComparison.OrdinalIgnoreCase) >= 0) || (pnp != null && pnp.IndexOf(hardwareId, StringComparison.OrdinalIgnoreCase) >= 0)) return Text(device.Name); } finally { ReleaseCom(device); } } } catch { } finally { ReleaseCom(results); ReleaseCom(service); ReleaseCom(locator); } return NotProvided; }
+
     }
 }

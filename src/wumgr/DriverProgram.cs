@@ -10,7 +10,6 @@ namespace wumgr
     static class DriverProgram
     {
         [DllImport("user32.dll")] static extern bool SetProcessDPIAware();
-        [DllImport("shcore.dll")] static extern int SetProcessDpiAwareness(int value);
         [STAThread]
         static int Main(string[] args)
         {
@@ -30,15 +29,7 @@ namespace wumgr
             bool windows = Environment.OSVersion.Platform == PlatformID.Win32NT;
             Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo(lang == UiLanguage.EnUS ? "en-US" : "zh-CN");
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang == UiLanguage.EnUS ? "en-US" : "zh-CN");
-            if (windows)
-            {
-                try
-                {
-                    if (SetProcessDpiAwareness(2) != 0) SetProcessDPIAware();
-                }
-                catch (DllNotFoundException) { SetProcessDPIAware(); }
-                catch (EntryPointNotFoundException) { SetProcessDPIAware(); }
-            }
+            if (windows) { try { SetProcessDPIAware(); } catch (EntryPointNotFoundException) { } }
             Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false);
             Application.ThreadException += (s, e) => MessageBox.Show(UiLanguageService.Get("程序遇到异常：\r\n") + UiLanguageService.Display(e.Exception.Message), UiLanguageService.Get("驱动下载中心"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             if (!windows && !demo) { MessageBox.Show(UiLanguageService.Get("驱动扫描需要 Windows 10 / 11 和 Windows 更新服务。\r\n当前系统仅支持 --demo 演示模式。"), UiLanguageService.Get("系统不受支持"), MessageBoxButtons.OK, MessageBoxIcon.Information); return 1; }

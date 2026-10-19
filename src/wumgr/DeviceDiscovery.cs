@@ -14,9 +14,11 @@ namespace wumgr
         public string Name { get; set; } = string.Empty;
         public string Manufacturer { get; set; } = string.Empty;
         public string Class { get; set; } = string.Empty;
+        public string ClassGuid { get; set; } = string.Empty;
+        public string Category { get { return DeviceClassification.Category(Class, ClassGuid); } }
         public List<string> HardwareIds { get; set; } = new List<string>();
         public List<string> CompatibleIds { get; set; } = new List<string>();
-        public int ProblemCode { get; set; }
+        public int ProblemCode { get; set; } = -1;
         public string InstalledVersion { get; set; } = string.Empty;
 
         public string DisplayStatus
@@ -25,14 +27,14 @@ namespace wumgr
         }
     }
 
-    /// <summary>从 WMI 发现设备，并将 WUA 返回的候选按完整硬件 ID 精确匹配。</summary>
+    /// <summary>通过 SetupAPI 发现设备，WMI 仅作补充，并将 WUA 返回的候选按完整硬件 ID 精确匹配。</summary>
     public sealed class DeviceDiscovery
     {
         public Task<List<LocalDeviceInfo>> ScanAsync(CancellationToken cancellationToken, IProgress<string> progress)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-                throw new PlatformNotSupportedException("设备发现需要 Windows WMI (Win32_PnPEntity)。");
+                throw new PlatformNotSupportedException("设备发现需要 Windows SetupAPI。");
 
             return Task.Run(() => ScanCore(cancellationToken, progress), cancellationToken);
         }
@@ -47,7 +49,7 @@ namespace wumgr
 
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var fallback = new List<DriverInfo>();
-            foreach (var candidate in candidates)
+            foreach (var candidate in DriverCatalog.NormalizeCandidates(candidates))
             {
                 if (candidate == null) continue;
                 bool direct = Intersects(hardware, IdSet(SplitIds(candidate.HardwareId)));
@@ -87,39 +89,107 @@ namespace wumgr
 
         private static List<LocalDeviceInfo> ScanCore(CancellationToken token, IProgress<string> progress)
         {
-            var result = new List<LocalDeviceInfo>();
-            progress?.Report("正在读取即插即用设备…");
-            var versions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            using (var signed = new ManagementObjectSearcher("SELECT DeviceID, DriverVersion FROM Win32_PnPSignedDriver"))
-            using (var objects = signed.Get())
+            var native = new List<LocalDeviceInfo>();
+            var wmi = new List<LocalDeviceInfo>();
+            var errors = new List<string>();
+            try { native = SetupApiDeviceSource.Scan(token, progress); }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) { errors.Add("SetupAPI: " + ex.Message); }
+            // WMI provider 不可用或单个属性缺失，不应使已发现的全部设备丢失。
+            try
             {
-                foreach (ManagementObject item in objects)
+                using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity"))
+                using (var objects = searcher.Get())
                 {
-                    token.ThrowIfCancellationRequested();
-                    var id = Text(item["DeviceID"]);
-                    if (id.Length != 0 && !versions.ContainsKey(id)) versions[id] = Text(item["DriverVersion"]);
+                    foreach (ManagementObject item in objects)
+                    using (item)
+                    {
+                        token.ThrowIfCancellationRequested();
+                        try
+                        {
+                            var present = Property(item, "Present");
+                            if (present is bool && !(bool)present) continue;
+                            var device = new LocalDeviceInfo {
+                                InstanceId = Text(Property(item, "PNPDeviceID")), Name = Text(Property(item, "Name")),
+                                Manufacturer = Text(Property(item, "Manufacturer")), Class = Text(Property(item, "PNPClass")),
+                                ClassGuid = Text(Property(item, "ClassGuid")),
+                                HardwareIds = Values(Property(item, "HardwareID")), CompatibleIds = Values(Property(item, "CompatibleID")),
+                                ProblemCode = Number(Property(item, "ConfigManagerErrorCode"))
+                            };
+                            if (device.InstanceId.Length == 0) device.InstanceId = Text(Property(item, "DeviceID"));
+                            if (device.Name.Length == 0) device.Name = Text(Property(item, "Description"));
+                            wmi.Add(device);
+                        }
+                        catch (Exception ex) { errors.Add("WMI device: " + ex.Message); }
+                    }
                 }
             }
-            using (var searcher = new ManagementObjectSearcher("SELECT PNPDeviceID, Name, Manufacturer, PNPClass, HardwareID, CompatibleID, ConfigManagerErrorCode FROM Win32_PnPEntity WHERE Present = TRUE"))
-            using (var objects = searcher.Get())
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) { errors.Add("WMI inventory: " + ex.Message); }
+            var result = MergeDevices(native, wmi);
+            // 已安装版本读取失败只影响版本显示，不能阻断显卡/网卡等枚举。
+            try
             {
-                foreach (ManagementObject item in objects)
+                var versions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                using (var signed = new ManagementObjectSearcher("SELECT DeviceID, DriverVersion FROM Win32_PnPSignedDriver"))
+                using (var objects = signed.Get())
+                    foreach (ManagementObject item in objects)
+                    using (item)
+                    {
+                        token.ThrowIfCancellationRequested();
+                        var id = Text(Property(item, "DeviceID"));
+                        if (id.Length != 0) versions[id] = Text(Property(item, "DriverVersion"));
+                    }
+                foreach (var device in result)
                 {
-                    token.ThrowIfCancellationRequested();
-                    var device = new LocalDeviceInfo {
-                        InstanceId = Text(item["PNPDeviceID"]), Name = Text(item["Name"]),
-                        Manufacturer = Text(item["Manufacturer"]), Class = Text(item["PNPClass"]),
-                        HardwareIds = Values(item["HardwareID"]), CompatibleIds = Values(item["CompatibleID"]),
-                        ProblemCode = Number(item["ConfigManagerErrorCode"]), InstalledVersion = string.Empty
-                    };
                     string version;
-                    if (versions.TryGetValue(device.InstanceId, out version)) device.InstalledVersion = version;
-                    result.Add(device);
+                    if (String.IsNullOrWhiteSpace(device.InstalledVersion) && versions.TryGetValue(device.InstanceId ?? "", out version)) device.InstalledVersion = version;
                 }
             }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) { errors.Add("WMI versions: " + ex.Message); }
+            if (result.Count == 0 && errors.Count > 0)
+                throw new InvalidOperationException("无法读取本机设备：" + String.Join("; ", errors.Distinct()));
+            if (errors.Count > 0) progress?.Report("设备扫描已降级：" + String.Join("; ", errors.Distinct()));
             progress?.Report("设备发现完成：" + result.Count);
             return result;
         }
+
+        /// <summary>按实例而不是显示名称归并，保留无驱动/未知设备和同型号多实例。</summary>
+        public static List<LocalDeviceInfo> MergeDevices(IEnumerable<LocalDeviceInfo> primary, IEnumerable<LocalDeviceInfo> secondary)
+        {
+            var result = new List<LocalDeviceInfo>();
+            var byId = new Dictionary<string, LocalDeviceInfo>(StringComparer.OrdinalIgnoreCase);
+            foreach (var source in (primary ?? Enumerable.Empty<LocalDeviceInfo>()).Concat(secondary ?? Enumerable.Empty<LocalDeviceInfo>()))
+            {
+                if (source == null) continue;
+                string id = (source.InstanceId ?? "").Trim();
+                LocalDeviceInfo target;
+                if (id.Length == 0 || !byId.TryGetValue(id, out target))
+                {
+                    target = new LocalDeviceInfo { InstanceId = id, Name = source.Name, Manufacturer = source.Manufacturer,
+                        Class = source.Class, ClassGuid = source.ClassGuid, ProblemCode = source.ProblemCode,
+                        InstalledVersion = source.InstalledVersion, HardwareIds = ValuesFromIds(source.HardwareIds), CompatibleIds = ValuesFromIds(source.CompatibleIds) };
+                    result.Add(target);
+                    if (id.Length > 0) byId.Add(id, target);
+                    continue;
+                }
+                if (String.IsNullOrWhiteSpace(target.Name)) target.Name = source.Name;
+                if (String.IsNullOrWhiteSpace(target.Manufacturer)) target.Manufacturer = source.Manufacturer;
+                if (String.IsNullOrWhiteSpace(target.Class)) target.Class = source.Class;
+                if (String.IsNullOrWhiteSpace(target.ClassGuid)) target.ClassGuid = source.ClassGuid;
+                if (String.IsNullOrWhiteSpace(target.InstalledVersion)) target.InstalledVersion = source.InstalledVersion;
+                if (target.ProblemCode < 0) target.ProblemCode = source.ProblemCode;
+                target.HardwareIds = ValuesFromIds(target.HardwareIds.Concat(source.HardwareIds ?? new List<string>()));
+                target.CompatibleIds = ValuesFromIds(target.CompatibleIds.Concat(source.CompatibleIds ?? new List<string>()));
+            }
+            return result;
+        }
+        static List<string> ValuesFromIds(IEnumerable<string> ids)
+        {
+            return (ids ?? Enumerable.Empty<string>()).Where(x => !String.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        }
+        static object Property(ManagementObject item, string name) { try { return item[name]; } catch { return null; } }
 
         private static int CompareAutomatic(DriverInfo a, DriverInfo b, LocalDeviceInfo device)
         {
@@ -169,6 +239,6 @@ namespace wumgr
             else { var text = Text(value); if (text.Length != 0) list.Add(text); }
             return list;
         }
-        private static int Number(object value) { int n; return Int32.TryParse(Text(value), out n) ? n : 0; }
+        private static int Number(object value) { int n; return Int32.TryParse(Text(value), out n) ? n : -1; }
     }
 }
