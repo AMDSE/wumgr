@@ -77,7 +77,6 @@ namespace wumgr
             { "全选可下载", "Select all available" },
             { "全部设备", "All devices" },
             { "关于与许可", "About & licenses" },
-            { "关于与许可证", "About & licenses" },
             { "关闭", "Close" },
             { "其他设备", "Other devices" },
             { "列表最高版本 · 非安装建议", "Highest listed version · verify before installing" },
