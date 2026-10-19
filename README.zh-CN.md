@@ -1,10 +1,10 @@
-> v7 修复设备枚举与重复驱动：新增原生 SetupAPI 清单，设备不再因无更新而消失；蓝牙/系统设备独立分类，同包候选去重并保留真实历史版本。Linux/Mono 下 181 项自动化测试全部通过，Windows 实机验收仍待完成。[更新说明](更新说明-v7.md)。
+> v8：主界面列出常见硬件及已安装驱动版本、提供商、日期，没有更新也保留；过滤虚拟设备、音频端点、系统杂项和重复逻辑核心。完整原始清单仍在“设备搜索”。详见 [更新说明-v8](更新说明-v8.md)。Windows 实机验收待完成。
 
-# WuMgr 驱动下载中心 · 中英文版 v7
+# WuMgr 驱动下载中心 · 中英文版 v8
 
 基于 [DavidXanatos/wumgr](https://github.com/DavidXanatos/wumgr) 的独立修改版，不是上游官方发布。当前以驱动中心为入口，不包含上游旧版完整更新管理界面。支持中英文界面、驱动型号／版本、历史候选选择与下载、设备自动发现、匹配下载、可选后台静默安装和驱动更新保护。
 
-[项目首页与双语运行截图](README.md) · [English](README.en.md) · [下载 v7](WuMgr-驱动下载中心-v7.zip)
+[项目首页与双语运行截图](README.md) · [English](README.en.md) · [下载 v8](WuMgr-驱动下载中心-v8.zip)
 
 ## 中英文切换
 
@@ -28,14 +28,17 @@
 
 ## 驱动更新保护
 
-采用微软“Windows 更新不包括驱动程序”策略，仅排除常规质量更新周期中的驱动包；安全／关键更新、功能更新动态驱动、手动安装及厂商工具不在保证范围内。设置作用于全机，组织策略／MDM仍可能覆盖。详见 v4 说明中的保护边界。
+采用微软“Windows 更新不包括驱动程序”策略，仅排除常规质量更新周期中的驱动包；安全／关键更新、功能更新动态驱动、手动安装及厂商工具不在保证范围内。设置作用于全机，组织策略／MDM仍可能覆盖。详见 [项目首页的保护边界](README.md#安全边界与已知限制)。
 
 ## 构建与验证
 
-Windows：安装 Visual Studio 2022“.NET 桌面开发”及 .NET Framework 4.8 目标包，执行 `build-windows.cmd`。脚本在缺少本地包时使用 NuGet CLI 还原固定的 Downloader 3.1.2；不允许漂移到其他版本。Linux／Mono 可执行 `bash tests/run-tests.sh`，脚本会校验本地包哈希并编译运行 `tests/DownloaderTests.cs` 及现有测试。
+Windows：安装 Visual Studio 2022“.NET 桌面开发”及 .NET Framework 4.8 目标包，在仓库 `src/` 目录执行 `build-windows.cmd`。脚本在缺少本地包时使用 NuGet CLI 还原固定的 Downloader 3.1.2；不允许漂移到其他版本。Linux／Mono 可执行 `bash tests/run-tests.sh`，脚本会校验本地包哈希并编译运行 `tests/DownloaderTests.cs` 及现有测试。
 
 **Linux 仅用于自动化测试；Windows 真实 WMI、WUA 扫描／安装、微软 CDN、管理员权限及策略实际生效仍需实机验收。** `--demo`／`--preview` 使用演示数据，扫描、下载、安装、策略修改均禁用。
 
 ## 源码、第三方与许可
 
 入口 `DriverProgram.cs`；后端包括 `DriverService.cs`、`DriverCatalog.cs`、`DeviceDiscovery.cs`、`DriverInstaller.cs`、`DriverUpdatePolicy.cs`。Downloader 固定为 **3.1.2/net462**，包无外部依赖；3.2+ 不兼容旧框架，不能直接升级。3.1.2 默认修改 TLS 证书策略，本项目适配恢复系统 TLS 1.2 和证书校验并限制并发。其 MIT 许可证及归属见 `third-party/Downloader/`，发布包也会携带。项目以 GNU GPLv3 发布，无任何担保。
+
+
+![常见设备及已安装驱动；有候选与无候选设备同时保留，演示数据](docs/images/device-inventory-zh-CN.png)

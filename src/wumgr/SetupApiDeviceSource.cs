@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
@@ -15,6 +16,7 @@ namespace wumgr
         private const uint DIGCF_PRESENT = 0x00000002;
         private const uint DIGCF_ALLCLASSES = 0x00000004;
         private const uint ERROR_INSUFFICIENT_BUFFER = 122;
+        private const uint ERROR_MORE_DATA = 234;
         private const uint ERROR_NO_MORE_ITEMS = 259;
         private const uint SPDRP_DEVICEDESC = 0;
         private const uint SPDRP_HARDWAREID = 1;
@@ -130,6 +132,8 @@ namespace wumgr
             uint status, problem;
             item.ProblemCode = CM_Get_DevNode_Status(out status, out problem, data.DevInst, 0) == 0 ? unchecked((int)problem) : -1;
             item.InstalledVersion = ReadDriverVersion(set, ref data);
+            item.InstalledProvider = ReadDriverValue(set, ref data, "ProviderName");
+            item.InstalledDate = NormalizeDate(ReadDriverValue(set, ref data, "DriverDate"));
             item.ClassGuid = String.IsNullOrWhiteSpace(classGuid) ? data.ClassGuid.ToString("B") : classGuid;
             if (String.IsNullOrWhiteSpace(item.Name)) item.Name = item.InstanceId;
             return item;
@@ -156,17 +160,39 @@ namespace wumgr
         { return ParseMultiSz(ReadStringProperty(set, ref data, property)); }
 
         private static string ReadDriverVersion(SafeDeviceInfoSetHandle set, ref SP_DEVINFO_DATA data)
+        { return ReadDriverValue(set, ref data, "DriverVersion"); }
+
+        private static string ReadDriverValue(SafeDeviceInfoSetHandle set, ref SP_DEVINFO_DATA data, string valueName)
         {
             SafeRegistryHandle key = null;
             try
             {
                 key = SetupDiOpenDevRegKey(set, ref data, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_READ);
                 if (key == null || key.IsInvalid) return String.Empty;
-                uint type; uint size = 512; var value = new StringBuilder((int)size);
-                return RegQueryValueExW(key, "DriverVersion", IntPtr.Zero, out type, value, ref size) == 0 ? value.ToString() : String.Empty;
+                for (int capacity = 256; capacity <= 1024 * 1024; capacity *= 2)
+                {
+                    uint type; uint size = (uint)capacity * 2;
+                    var value = new StringBuilder(capacity);
+                    int error = RegQueryValueExW(key, valueName, IntPtr.Zero, out type, value, ref size);
+                    if (error == 0) return value.ToString().TrimEnd('\0').Trim();
+                    if (error != ERROR_MORE_DATA) return String.Empty;
+                }
+                return String.Empty;
             }
             catch { return String.Empty; }
             finally { if (key != null) key.Dispose(); }
+        }
+
+        private static string NormalizeDate(string value)
+        {
+            if (String.IsNullOrWhiteSpace(value)) return String.Empty;
+            DateTime date;
+            string text = value.Trim();
+            if (DateTime.TryParseExact(text, new[] { "yyyy-MM-dd", "yyyy/MM/dd", "MM/dd/yyyy", "M/d/yyyy",
+                "MM-dd-yyyy", "M-d-yyyy", "yyyyMMdd" }, CultureInfo.InvariantCulture,
+                DateTimeStyles.AllowWhiteSpaces, out date))
+                return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            return String.Empty;
         }
     }
 }

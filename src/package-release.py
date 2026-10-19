@@ -5,7 +5,7 @@ import zipfile
 
 repo = Path(__file__).resolve().parent
 out = repo.parent / "wumgr-delivery"
-stage = out / "WuMgr-驱动下载中心-v7"
+stage = out / "WuMgr-驱动下载中心-v8"
 if stage.exists():
     shutil.rmtree(stage)
 program = stage / "程序"
@@ -20,7 +20,7 @@ for name in ("wumgr.exe", "wumgr.exe.config", "Downloader.dll"):
         raise FileNotFoundError(f"缺少构建输出: {path}")
     shutil.copy2(path, program / name)
 
-for name in ("LICENSE", "README.md", "README.zh-CN.md", "README.en.md", "PRIVACY_POLICY.md", "更新说明-v7.md"):
+for name in ("LICENSE", "README.md", "README.zh-CN.md", "README.en.md", "PRIVACY_POLICY.md", "更新说明-v8.md"):
     shutil.copy2(repo / name, stage / name)
 shutil.copy2(repo / "LICENSE", program / "LICENSE")
 shutil.copy2(repo / "wumgr" / "res" / "icons8.txt", program / "图标归属.txt")
@@ -39,7 +39,7 @@ for path in repo.rglob("*"):
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(path, target)
 
-images = ("driver-center-zh-CN.png", "driver-center-en-US.png")
+images = ("driver-center-zh-CN.png", "driver-center-en-US.png", "device-inventory-zh-CN.png", "device-inventory-en-US.png")
 for name in images:
     preview = repo / "docs" / "images" / name
     if not preview.is_file():
@@ -51,11 +51,12 @@ for name in images:
 log = repo / "artifacts" / "最终测试日志.txt"
 if not log.exists():
     raise FileNotFoundError(f"缺少最新测试日志: {log}")
-shutil.copy2(log, stage / "最终测试日志-v7.txt")
+shutil.copy2(log, stage / "最终测试日志-v8.txt")
 (stage / "先读我.txt").write_text(
-    "WuMgr 驱动下载中心 / Driver Download Center v7\n\n"
+    "WuMgr 驱动下载中心 / Driver Download Center v8\n\n"
     "运行 / Run: Windows 10 / 11 + .NET Framework 4.8, 程序\\wumgr.exe\n"
-    "设备：原生 SetupAPI 全类别枚举；无更新候选设备也显示；硬件精确匹配与重复载荷去重。\n"
+    "设备：原生 SetupAPI 全类别读取，主界面只显示常见硬件及已安装驱动版本/提供商/日期；无更新也保留。\n"
+    "过滤虚拟设备、音频端点、PCI桥/ACPI杂项及重复逻辑核心；完整清单仍可在设备搜索查看。\n"
     "语言 / Language: 顶栏简体中文 / English 即时切换；首次默认中文，手动切换保存偏好。\n"
     "Command-line: wumgr.exe --lang en-US / --lang zh-CN\n"
     "下载：Downloader 3.1.2，8 块、4 并发；小文件或无 Range 时单流。满足校验条件可恢复。\n"
@@ -71,7 +72,7 @@ files = sorted(p for p in stage.rglob("*") if p.is_file())
 manifest = [hashlib.sha256(p.read_bytes()).hexdigest() + "  " + p.relative_to(stage).as_posix() for p in files]
 (stage / "SHA256SUMS.txt").write_text("\n".join(manifest) + "\n", encoding="utf-8")
 
-archive = out / "WuMgr-驱动下载中心-v7.zip"
+archive = out / "WuMgr-驱动下载中心-v8.zip"
 out.mkdir(parents=True, exist_ok=True)
 with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:
     for path in sorted(stage.rglob("*")):
@@ -80,7 +81,7 @@ with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:
 with zipfile.ZipFile(archive) as z:
     assert z.testzip() is None
     names = z.namelist()
-    for suffix in ("/程序/wumgr.exe", "/程序/Downloader.dll", "/源码/tests/ServiceTests.cs", "/README.en.md", "/docs/images/driver-center-en-US.png", "/最终测试日志-v7.txt"):
+    for suffix in ("/程序/wumgr.exe", "/程序/Downloader.dll", "/源码/tests/ServiceTests.cs", "/README.en.md", "/docs/images/driver-center-en-US.png", "/最终测试日志-v8.txt"):
         assert any(n.endswith(suffix) for n in names), suffix
     assert not any(n.endswith(".exe") and "/源码/" in n for n in names)
     assert not any("/packages/" in n or "/bin/" in n or "/obj/" in n for n in names)

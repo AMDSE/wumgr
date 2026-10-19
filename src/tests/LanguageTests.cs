@@ -51,9 +51,9 @@ class LanguageTests
                 var expanded = new HashSet<string>(Field<HashSet<string>>(f, "expanded"));
                 Field<Button>(f, "languageEn").PerformClick(); Application.DoEvents();
                 Check(f.Text == "Driver Center · WuMgr", "标题即时变英文");
-                Check(Field<Label>(f, "summary").Text == "3 devices with available driver versions", "动态设备摘要为英文");
+                Check(Field<Label>(f, "summary").Text == "6 common devices, 6 candidate versions", "动态设备摘要为英文");
                 Check(Field<Label>(f, "subtitle").Text.StartsWith("Demo data"), "演示安全提示为英文");
-                Check(Field<Label>(f, "total").Text.Contains("Showing 1 devices"), "筛选统计为英文");
+                Check(Field<Label>(f, "total").Text.Contains("Showing 1"), "筛选统计为英文");
                 Check(Field<Label>(f, "selectedLabel").Text.StartsWith("Selected 1"), "选择统计为英文");
                 Check(Field<Button>(f, "download").Text == "Download & silently install", "安装选项同步英文主按钮");
                 Check(Field<string>(f, "category") == "声卡" && list.Controls.Count == 1, "语言切换保留业务分类键与可见设备");

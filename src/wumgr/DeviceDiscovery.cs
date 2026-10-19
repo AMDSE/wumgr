@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Management;
 using System.Threading;
@@ -20,6 +21,8 @@ namespace wumgr
         public List<string> CompatibleIds { get; set; } = new List<string>();
         public int ProblemCode { get; set; } = -1;
         public string InstalledVersion { get; set; } = string.Empty;
+        public string InstalledProvider { get; set; } = string.Empty;
+        public string InstalledDate { get; set; } = string.Empty;
 
         public string DisplayStatus
         {
@@ -130,20 +133,25 @@ namespace wumgr
             // 已安装版本读取失败只影响版本显示，不能阻断显卡/网卡等枚举。
             try
             {
-                var versions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                using (var signed = new ManagementObjectSearcher("SELECT DeviceID, DriverVersion FROM Win32_PnPSignedDriver"))
+                var versions = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+                using (var signed = new ManagementObjectSearcher("SELECT DeviceID, DriverProviderName, DriverDate, DriverVersion FROM Win32_PnPSignedDriver"))
                 using (var objects = signed.Get())
                     foreach (ManagementObject item in objects)
                     using (item)
                     {
                         token.ThrowIfCancellationRequested();
                         var id = Text(Property(item, "DeviceID"));
-                        if (id.Length != 0) versions[id] = Text(Property(item, "DriverVersion"));
+                        if (id.Length != 0) versions[id] = new string[] {
+                            Text(Property(item, "DriverVersion")), Text(Property(item, "DriverProviderName")),
+                            NormalizeDate(Text(Property(item, "DriverDate"))) };
                     }
                 foreach (var device in result)
                 {
-                    string version;
-                    if (String.IsNullOrWhiteSpace(device.InstalledVersion) && versions.TryGetValue(device.InstanceId ?? "", out version)) device.InstalledVersion = version;
+                    string[] metadata;
+                    if (!versions.TryGetValue(device.InstanceId ?? "", out metadata)) continue;
+                    if (String.IsNullOrWhiteSpace(device.InstalledVersion)) device.InstalledVersion = metadata[0];
+                    if (String.IsNullOrWhiteSpace(device.InstalledProvider)) device.InstalledProvider = metadata[1];
+                    if (String.IsNullOrWhiteSpace(device.InstalledDate)) device.InstalledDate = metadata[2];
                 }
             }
             catch (OperationCanceledException) { throw; }
@@ -169,7 +177,8 @@ namespace wumgr
                 {
                     target = new LocalDeviceInfo { InstanceId = id, Name = source.Name, Manufacturer = source.Manufacturer,
                         Class = source.Class, ClassGuid = source.ClassGuid, ProblemCode = source.ProblemCode,
-                        InstalledVersion = source.InstalledVersion, HardwareIds = ValuesFromIds(source.HardwareIds), CompatibleIds = ValuesFromIds(source.CompatibleIds) };
+                        InstalledVersion = source.InstalledVersion, InstalledProvider = source.InstalledProvider,
+                        InstalledDate = source.InstalledDate, HardwareIds = ValuesFromIds(source.HardwareIds), CompatibleIds = ValuesFromIds(source.CompatibleIds) };
                     result.Add(target);
                     if (id.Length > 0) byId.Add(id, target);
                     continue;
@@ -179,6 +188,8 @@ namespace wumgr
                 if (String.IsNullOrWhiteSpace(target.Class)) target.Class = source.Class;
                 if (String.IsNullOrWhiteSpace(target.ClassGuid)) target.ClassGuid = source.ClassGuid;
                 if (String.IsNullOrWhiteSpace(target.InstalledVersion)) target.InstalledVersion = source.InstalledVersion;
+                if (String.IsNullOrWhiteSpace(target.InstalledProvider)) target.InstalledProvider = source.InstalledProvider;
+                if (String.IsNullOrWhiteSpace(target.InstalledDate)) target.InstalledDate = source.InstalledDate;
                 if (target.ProblemCode < 0) target.ProblemCode = source.ProblemCode;
                 target.HardwareIds = ValuesFromIds(target.HardwareIds.Concat(source.HardwareIds ?? new List<string>()));
                 target.CompatibleIds = ValuesFromIds(target.CompatibleIds.Concat(source.CompatibleIds ?? new List<string>()));
@@ -231,6 +242,27 @@ namespace wumgr
         private static IEnumerable<string> SplitIds(string value) { return (value ?? string.Empty).Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries); }
         private static string Normalize(string value) { return String.IsNullOrWhiteSpace(value) ? string.Empty : (value.Trim() == "未提供" ? string.Empty : value.Trim().ToUpperInvariant()); }
         private static string Text(object value) { return value == null ? string.Empty : Convert.ToString(value).Trim(); }
+        private static string NormalizeDate(string value)
+        {
+            if (String.IsNullOrWhiteSpace(value)) return String.Empty;
+            DateTime date;
+            string text = value.Trim();
+            if (text.Length >= 8 && text[0] >= '0' && text[0] <= '9' && text[1] >= '0' && text[1] <= '9'
+                && text[2] >= '0' && text[2] <= '9' && text[3] >= '0' && text[3] <= '9' && text[4] == '-'
+                && text[7] == '-')
+            {
+                if (DateTime.TryParseExact(text.Substring(0, 10), "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out date)) return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            }
+            if (text.Length >= 14 && DateTime.TryParseExact(text.Substring(0, 14), "yyyyMMddHHmmss",
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
+                return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            if (DateTime.TryParseExact(text, "yyyyMMddHHmmss.ffffffzzz", CultureInfo.InvariantCulture, DateTimeStyles.None, out date)
+                || DateTime.TryParseExact(text, "yyyyMMddHHmmss.ffffff+000", CultureInfo.InvariantCulture, DateTimeStyles.None, out date)
+                || DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out date))
+                return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            return String.Empty;
+        }
         private static List<string> Values(object value)
         {
             var list = new List<string>();

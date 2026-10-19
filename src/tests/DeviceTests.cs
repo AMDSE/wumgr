@@ -57,10 +57,10 @@ class DeviceTests
             Check(DeviceClassification.Category("Unknown") == "其他设备", "未知类别保持其他设备，不按厂商猜芯片组");
             var all = new[] { native, new LocalDeviceInfo { InstanceId = "HDAUDIO\\A", Name = "Audio", Class = "MEDIA" }, new LocalDeviceInfo { InstanceId = "PCI\\NET", Name = "Wi-Fi", Class = "Net" }, new LocalDeviceInfo { InstanceId = "USB\\BT", Name = "Bluetooth", Class = "Bluetooth" }, new LocalDeviceInfo { InstanceId = "ACPI\\UNKNOWN", ProblemCode = 28 } };
             var entries = DeviceInventory.BuildEntries(all, new DriverInfo[0]);
-            Check(entries.Count == 5 && entries.All(e => e.Versions.Count == 0 && e.LocalDevice != null), "没有任何WUA候选时显卡声卡网卡蓝牙未知设备全部保留");
+            Check(entries.Count == 4 && entries.All(e => e.Versions.Count == 0 && e.LocalDevice != null), "没有任何WUA候选时常见显卡声卡网卡蓝牙保留，未知杂项隐藏");
             var gpuUpdate = D("gpu", native.HardwareIds[0], "2.0", new DateTime(2025,1,1));
             entries = DeviceInventory.BuildEntries(all, new[] { gpuUpdate });
-            Check(entries.Count == 5 && entries[0].Latest == gpuUpdate && entries.Skip(1).All(e => e.Latest == null), "更新候选只关联匹配设备，不影响其他设备可见性");
+            Check(entries.Count == 4 && entries[0].Latest == gpuUpdate && entries.Skip(1).All(e => e.Latest == null), "更新候选只关联匹配设备，不影响其他设备可见性");
             Check(DeviceInventory.BuildEntries(new[] { native, supplement }, new[] { gpuUpdate }).Count == 1, "重复实例只生成一张本机设备卡");
             Check(DeviceDiscovery.MergeDevices(new[] { new LocalDeviceInfo(), new LocalDeviceInfo() }, null).Count == 2, "缺失实例ID不能相互误去重");
 

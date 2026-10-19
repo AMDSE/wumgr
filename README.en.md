@@ -1,10 +1,10 @@
-> v7 fixes device enumeration and duplicate drivers: native SetupAPI inventory, independent device visibility, Bluetooth/system categories, and safe candidate deduplication. 181 automated tests passed under Linux/Mono; Windows hardware acceptance is still pending. [Release notes](更新说明-v7.md).
+> v8: the main list shows common detected hardware and installed driver version/provider/date even without updates. Virtual devices, endpoint noise and duplicate CPU cores are hidden here; Device search retains the full inventory. Windows hardware acceptance is pending.
 
-# WuMgr Driver Download Center · v7
+# WuMgr Driver Download Center · v8
 
 **Find device drivers, choose historical candidates, download in parallel, and optionally install silently. Now with instant Simplified Chinese / English switching.**
 
-[简体中文](README.md) · [Download v7](WuMgr-驱动下载中心-v7.zip) · [Detailed Chinese guide](README.zh-CN.md)
+[简体中文](README.md) · [Download v8](WuMgr-驱动下载中心-v8.zip) · [Detailed Chinese guide](README.zh-CN.md)
 
 This is an independent modification of [DavidXanatos/wumgr](https://github.com/DavidXanatos/wumgr), **not an official upstream release**. The current executable opens the driver center; it does not include the upstream legacy full Windows update-management UI.
 
@@ -14,11 +14,13 @@ These are captures of the actual WinForms application running under Linux / Mono
 
 ### English
 
-![English driver center: device filters, version history and download options](driver-center-en-US.png)
+![English driver center: device filters, version history and download options](docs/images/driver-center-en-US.png)
 
 ### 简体中文
 
-![Simplified Chinese driver center](driver-center-zh-CN.png)
+![Simplified Chinese driver center](docs/images/driver-center-zh-CN.png)
+
+![Common device inventory: installed drivers with and without update candidates](docs/images/device-inventory-en-US.png)
 
 ## Features
 
@@ -31,12 +33,12 @@ These are captures of the actual WinForms application running under Linux / Mono
 
 ## Download and run
 
-1. [Download the complete v7 ZIP](WuMgr-驱动下载中心-v7.zip) and extract it fully.
+1. [Download the complete v8 ZIP](WuMgr-驱动下载中心-v8.zip) and extract it fully.
 2. On **Windows 10 / 11**, open `程序\wumgr.exe`. **.NET Framework 4.8**, Windows Update services and network access are required.
 3. Scan for drivers, verify the model and version, choose a folder, and download. Use device search to inspect exact matches.
 4. Only if installation is intended, run as administrator, explicitly enable silent installation, and review the confirmation. The app does not auto-elevate or restart the computer, and protection is off by default.
 
-The package includes the executable, corresponding source, bilingual documentation, previews, test output and SHA-256 manifest.
+The package includes the executable, corresponding source, bilingual documentation, previews, test output and SHA-256 manifest. [Previous Releases](https://github.com/AMDSE/wumgr/releases) remain available for rollback.
 
 ## Language switching
 
@@ -61,25 +63,27 @@ Changing language in the UI saves the preference. Preview mode uses safe demo da
 
 **Protection is limited.** The Microsoft [ExcludeWUDriversInQualityUpdate policy](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-update#excludewudriversinqualityupdate) excludes drivers from routine quality updates without disabling security updates. It does not guarantee blocking feature-update drivers, manual changes or vendor tools. It applies system-wide, can be overridden by organizational policy, and is not promised to work on Home editions. Relevant original values are backed up for restoration.
 
-**Validation covers Linux / Mono automated tests and demo rendering only.** Real Windows WMI/WUA, Microsoft CDN downloads, elevation and effective policy behavior still require on-device acceptance testing. See the [Windows checklist](Windows验收清单.md) and [v7 test log](最终测试日志-v7.txt).
+**Validation covers Linux / Mono automated tests and demo rendering only.** Real Windows WMI/WUA, Microsoft CDN downloads, elevation and effective policy behavior still require on-device acceptance testing. See the [Windows checklist ](src/tests/Windows验收清单.md) and [v8 test log](最终测试日志-v8.txt).
 
 ## Build and test
 
 On Windows, install Visual Studio 2022 with the .NET desktop workload and .NET Framework 4.8 targeting pack, then run:
 
 ```bat
+cd src
 build-windows.cmd
 ```
 
 The script restores pinned Downloader 3.1.2 with NuGet CLI if needed. On Linux / Mono, for tests and demo rendering only:
 
 ```bash
+cd src
 bash tests/run-tests.sh
 python3 package-release.py
 ```
 
-The complete package contains `源码/wumgr/DriverProgram.cs` and `源码/tests/`. Run the commands above from the extracted `源码/` directory. Packaging excludes NuGet caches, generated `bin/obj` directories and test executables from the source tree.
+The repository entry point is `src/wumgr/DriverProgram.cs`; tests are in `src/tests/`. Packaging excludes NuGet caches, generated `bin/obj` directories and test executables from the source tree.
 
 ## License and attribution
 
-Released under [GNU GPLv3](LICENSE), without warranty. Original project copyright belongs to DavidXanatos. [Downloader 3.1.2](https://github.com/bezzad/Downloader/tree/v3.1.2) is MIT-licensed; attribution is included in [third-party/Downloader](Downloader-归属说明.md) and the release. Existing Icons8 attribution and licensing are retained. The previous root Apache 2.0 template is preserved for historical reference; see [licensing notes](许可说明.md). See [privacy policy](PRIVACY_POLICY.md).
+Released under [GNU GPLv3](LICENSE), without warranty. Original project copyright belongs to DavidXanatos. [Downloader 3.1.2](https://github.com/bezzad/Downloader/tree/v3.1.2) is MIT-licensed; attribution is included in [third-party/Downloader](third-party/Downloader/README.md) and the release. Existing Icons8 attribution and licensing are retained. The previous root Apache 2.0 template is preserved for historical reference; see [licensing notes](docs/licensing/README.md). See [privacy policy](PRIVACY_POLICY.md).

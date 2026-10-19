@@ -26,7 +26,7 @@ class UiTests
                 Field<Button>(f, "languageEn").PerformClick(); Application.DoEvents(); Check(UiLanguageService.Current == UiLanguage.EnUS && f.Text.StartsWith("Driver Center"), "English switch applies immediately");
                 Field<Button>(f, "languageZh").PerformClick(); Application.DoEvents(); Check(UiLanguageService.Current == UiLanguage.ZhCN && f.Text.StartsWith("驱动下载中心"), "Chinese switch restores immediately");
                 Func<List<Control>> cards = () => list.Controls.Cast<Control>().ToList();
-                Check(cards().Count == 3, "演示数据按硬件分成三张设备卡");
+                Check(cards().Count == 6, "演示数据包含三张候选卡和三张无更新设备卡");
                 Check(cards().Any(c => c.Height > 250), "初始音频设备展开历史版本");
                 Check(Field<Label>(f, "selectedLabel").Text.StartsWith("已选 1 项"), "演示初始只选择一个最新版本");
                 Check(!Field<CheckBox>(f, "silentInstall").Checked && !Field<CheckBox>(f, "silentInstall").Enabled, "演示模式禁止安装且默认不勾选");
@@ -67,7 +67,18 @@ class UiTests
                 Check(restoredChoice.Version == "6.0.9657.1", "切换历史版本后折叠、搜索重建仍保留choice");
 
                 Field<Button>(f, "clear").PerformClick();
+                // Supplementary demo preview: installed-only hardware alongside real-shaped candidate cards.
+                Field<HashSet<string>>(f, "expanded").Clear();
+                var previewLocal = Field<List<LocalDeviceInfo>>(f, "localDevices");
+                var btPreview = previewLocal.First(x => x.Class == "Bluetooth"); previewLocal.Remove(btPreview); previewLocal.Insert(1, btPreview);
+                Refresh(f); Application.DoEvents();
+                System.IO.Directory.CreateDirectory("docs/images");
+                f.SavePreview(System.IO.Path.GetFullPath("docs/images/device-inventory-zh-CN.png"));
+                Field<Button>(f, "languageEn").PerformClick(); Application.DoEvents();
+                f.SavePreview(System.IO.Path.GetFullPath("docs/images/device-inventory-en-US.png"));
+                Field<Button>(f, "languageZh").PerformClick(); Application.DoEvents();
                 var drivers = Field<List<DriverInfo>>(f, "drivers"); drivers.Add(new DriverInfo { Id = "no-url", DeviceModel = "无地址的测试设备", Manufacturer = "测试厂商", Provider = "测试厂商", DriverClass = "MEDIA", HardwareId = "PCI\\VEN_TEST&DEV_0001", Version = "1.0.0.0", Title = "测试驱动", DownloadUrls = new List<string>() });
+                Field<List<LocalDeviceInfo>>(f, "localDevices").Add(new LocalDeviceInfo { InstanceId = "TEST_NO_URL", Name = "无地址的测试设备", Class = "MEDIA", HardwareIds = new List<string> { "PCI\\VEN_TEST&DEV_0001" } });
                 Refresh(f); search.Text = "无地址"; Application.DoEvents();
                 var noUrl = cards().Single(); var noUrlCheck = noUrl.Controls.Cast<Control>().OfType<CheckBox>().Single(); Check(!noUrlCheck.Enabled, "无下载地址的设备复选框禁用");
                 ((Button)noUrl.Controls.Cast<Control>().First(c => c.Text.StartsWith("历史版本") || c.Text.StartsWith("查看版本"))).PerformClick(); Application.DoEvents();
@@ -92,26 +103,31 @@ class UiTests
                     new LocalDeviceInfo { InstanceId = "AUDIO", Name = "测试声卡", Class = "MEDIA" },
                     new LocalDeviceInfo { InstanceId = "NET", Name = "测试网卡", Class = "Net" },
                     new LocalDeviceInfo { InstanceId = "BT", Name = "测试蓝牙", Class = "Bluetooth" },
-                    new LocalDeviceInfo { InstanceId = "CHIP", Name = "测试芯片组", Class = "System" },
+                    new LocalDeviceInfo { InstanceId = "CHIP", Name = "Intel SMBus Controller", Class = "System" },
                     new LocalDeviceInfo { InstanceId = "UNKNOWN", Name = "未知设备", ProblemCode = 28 }
                 });
                 Refresh(f);
                 var inventoryList = Field<FlowLayoutPanel>(f, "list");
-                Check(inventoryList.Controls.Count == 6, "无更新候选时主界面仍列出全部六类设备");
-                Check(Field<Label>(f, "total").Text.StartsWith("6 个设备"), "设备计数基于真实清单而不是更新数");
+                Check(inventoryList.Controls.Count == 5, "无更新候选时主界面仍列出五类常见设备，不列未知杂项");
+                Check(inventoryList.Controls.Cast<Control>().All(c => c.Controls.Cast<Control>().Any(x => x.Text.StartsWith("已安装驱动："))), "无候选设备均有独立已安装驱动信息行");
+                Check(Field<Label>(f, "total").Text.StartsWith("5 个常见设备"), "设备计数基于真实清单而不是更新数");
                 Field<Button>(f, "selectAll").PerformClick();
                 Check(Field<HashSet<string>>(f, "selected").Count == 0, "无候选设备不能全选成假驱动");
                 var inventoryTabs = ((IList)f.GetType().GetField("tabs", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(f)).Cast<Button>().ToList();
-                foreach (string label in new[] { "显卡", "声卡", "网络适配器", "蓝牙", "系统设备", "其他设备" }) {
+                foreach (string label in new[] { "显卡", "声卡", "网络适配器", "蓝牙", "系统设备" }) {
                     inventoryTabs.First(t => t.Text == label).PerformClick();
                     Check(inventoryList.Controls.Count == 1, label + "类别即使无更新也能查看");
                 }
                 inventoryTabs.First(t => t.Text == "全部设备").PerformClick();
                 Field<List<DriverInfo>>(f, "drivers").Add(new DriverInfo { Id = "gpu-update", DeviceModel = "显卡候选", HardwareId = "PCI\\VEN_TEST&DEV_GPU", DriverClass = "Display", Version = "2.0", DownloadUrls = new List<string> { "https://example.invalid/gpu.cab" } });
                 Refresh(f);
-                Check(inventoryList.Controls.Count == 6 && inventoryList.Controls.Cast<Control>().Count(c => c.GetType().Name == "DriverCard") == 1, "只有一项更新也不隐藏其余五个设备");
+                Check(inventoryList.Controls.Count == 5 && inventoryList.Controls.Cast<Control>().Count(c => c.GetType().Name == "DriverCard") == 1, "只有一项更新也不隐藏其余四个常见设备");
                 Field<TextBox>(f, "search").Text = "测试蓝牙"; Application.DoEvents();
                 Check(inventoryList.Controls.Count == 1, "无候选设备也支持名称搜索");
+                Field<TextBox>(f, "search").Text = "";
+                Field<Button>(f, "languageEn").PerformClick(); Application.DoEvents();
+                Check(inventoryList.Controls.Count == 5 && inventoryList.Controls.Cast<Control>().Where(c => c.GetType().Name == "LocalDeviceCard").All(c => c.Controls.Cast<Control>().Any(x => x.Text.StartsWith("Installed driver:"))), "常见设备已安装信息支持英文切换");
+                Field<Button>(f, "languageZh").PerformClick();
                 f.Close();
 
             }

@@ -1,0 +1,9 @@
+wumgr/bin/
+wumgr/obj/
+artifacts/
+packages/
+__pycache__/
+*.user
+*.suo
+.vs/
+*.log
