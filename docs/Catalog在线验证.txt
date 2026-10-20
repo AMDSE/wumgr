@@ -1,0 +1,5 @@
+search pages=2 entries=50 distinct=50 truncated=True
+page1-first=027e8668-e62d-411f-a4a8-7ad2a44d8d09 page2-first=83bcb1d8-7909-4b2e-8221-5c7ff028398f
+detail id=027e8668-e62d-411f-a4a8-7ad2a44d8d09 hardware=4 architecture=AMD64 version=2.1.5.10 provider=Intel products=Windows 11 Client, version 24H2 and later, Servicing Drivers , Windows 11 Client, version 24H2 and later, Upgrade & Servicing Drivers
+download-dialog packages=1 hosts=catalog.s.download.windowsupdate.com
+Linux/Mono live HTTP protocol passed. No driver package executed; no Windows WUA installation tested.

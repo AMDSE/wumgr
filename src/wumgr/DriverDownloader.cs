@@ -53,7 +53,7 @@ namespace wumgr
             public bool CanResume { get { return Ranges && Length > 0 && (!String.IsNullOrEmpty(ETag) || !String.IsNullOrEmpty(LastModified)); } }
         }
 
-        public async Task DownloadAsync(string url, string target, CancellationToken token, Action<DriverTransferProgress> report)
+        public async Task DownloadAsync(string url, string target, CancellationToken token, Action<DriverTransferProgress> report, bool officialOnly = false)
         {
             await EngineGate.WaitAsync(token).ConfigureAwait(false);
             try
@@ -65,7 +65,7 @@ namespace wumgr
                 int connectionLimit = ServicePointManager.DefaultConnectionLimit;
                 int idleTime = ServicePointManager.MaxServicePointIdleTime;
                 bool expectContinue = ServicePointManager.Expect100Continue;
-                using (var engine = new ConfiguredDownloadService(CreateConfiguration()))
+                using (var engine = CreateEngineWithRestoredDefaults())
                 {
                     ServicePointManager.ServerCertificateValidationCallback = certificatePolicy;
                     ServicePointManager.SecurityProtocol = protocol == SecurityProtocolType.SystemDefault ? protocol : protocol | SecurityProtocolType.Tls12;
@@ -77,7 +77,7 @@ namespace wumgr
                     using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(token))
                     {
                         deadline.CancelAfter(TimeSpan.FromMinutes(15));
-                        try { await TransferAsync(engine, url, target, deadline.Token, report).ConfigureAwait(false); }
+                        try { await TransferAsync(engine, url, target, deadline.Token, report, officialOnly).ConfigureAwait(false); }
                         catch (Exception) when (deadline.IsCancellationRequested)
                         {
                             token.ThrowIfCancellationRequested();
@@ -87,6 +87,23 @@ namespace wumgr
                 }
             }
             finally { EngineGate.Release(); }
+        }
+
+        private static ConfiguredDownloadService CreateEngineWithRestoredDefaults()
+        {
+            var certificates = ServicePointManager.ServerCertificateValidationCallback;
+            var protocol = ServicePointManager.SecurityProtocol;
+            int connections = ServicePointManager.DefaultConnectionLimit, idle = ServicePointManager.MaxServicePointIdleTime;
+            bool expect = ServicePointManager.Expect100Continue;
+            try { return new ConfiguredDownloadService(CreateConfiguration()); }
+            finally
+            {
+                ServicePointManager.ServerCertificateValidationCallback = certificates;
+                ServicePointManager.SecurityProtocol = protocol;
+                ServicePointManager.DefaultConnectionLimit = connections;
+                ServicePointManager.MaxServicePointIdleTime = idle;
+                ServicePointManager.Expect100Continue = expect;
+            }
         }
 
         private static DownloadConfiguration CreateConfiguration()
@@ -105,13 +122,13 @@ namespace wumgr
             };
         }
 
-        private static async Task TransferAsync(ConfiguredDownloadService engine, string url, string target, CancellationToken token, Action<DriverTransferProgress> report)
+        private static async Task TransferAsync(ConfiguredDownloadService engine, string url, string target, CancellationToken token, Action<DriverTransferProgress> report, bool officialOnly)
         {
             string part = target + ".part", statePath = target + ".resume.xml";
             // Prevent simultaneous processes from sharing a mutable partial file.
             using (var fileLock = new FileStream(target + ".download.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
             {
-                RemoteFile remote = await ProbeAsync(url, token).ConfigureAwait(false);
+                RemoteFile remote = await ProbeAsync(url, token, officialOnly).ConfigureAwait(false);
                 var state = ReadState(statePath, part, url, remote);
                 if (state == null) { DeleteIfExists(statePath); DeleteIfExists(part); }
                 var package = new DownloadPackage { FileName = part, Urls = new[] { url } };
@@ -195,50 +212,70 @@ namespace wumgr
             public void ConfigureHeaders(WebHeaderCollection headers) { Options.RequestConfiguration.Headers = headers; }
         }
 
-        private static async Task<RemoteFile> ProbeAsync(string url, CancellationToken token)
+        private static async Task<RemoteFile> ProbeAsync(string url, CancellationToken token, bool officialOnly)
         {
-            var first = await ProbeRangeAsync(url, 0, token).ConfigureAwait(false);
+            var first = await ProbeRangeAsync(url, 0, token, officialOnly).ConfigureAwait(false);
             if (first.Ranges && first.Length > 1)
             {
-                var second = await ProbeRangeAsync(url, 1, token).ConfigureAwait(false);
+                var second = await ProbeRangeAsync(url, 1, token, officialOnly).ConfigureAwait(false);
                 if (!second.Ranges || first.Length != second.Length || first.ETag != second.ETag || first.LastModified != second.LastModified)
                     throw new IOException("服务器未正确响应分块请求或文件已变化，请重试。");
             }
             return first;
         }
-        private static async Task<RemoteFile> ProbeRangeAsync(string url, long start, CancellationToken token)
+        private static async Task<RemoteFile> ProbeRangeAsync(string url, long start, CancellationToken token, bool officialOnly)
         {
-            token.ThrowIfCancellationRequested();
-            var request = (HttpWebRequest)WebRequest.Create(url);
-            request.Method = "GET"; request.AddRange(start, start);
-            request.Timeout = 30000; request.ReadWriteTimeout = 15000;
-            request.UserAgent = "WuMgr-Driver/5.0";
-            request.AutomaticDecompression = DecompressionMethods.None;
-            request.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
-            using (token.Register(request.Abort))
+            var original = new Uri(url);
+            var current = original;
+            for (int redirects = 0; redirects <= 5; redirects++)
             {
-                HttpWebResponse response;
-                try { response = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false); }
-                catch (WebException ex) { token.ThrowIfCancellationRequested(); if (ex.Response != null) ex.Response.Dispose(); throw; }
-                using (response)
+                token.ThrowIfCancellationRequested();
+                if ((current.Scheme != "http" && current.Scheme != "https") || !String.IsNullOrEmpty(current.UserInfo))
+                    throw new IOException("不允许的下载地址。");
+                if (original.Scheme == "https" && current.Scheme != "https")
+                    throw new IOException("拒绝从 HTTPS 降级到 HTTP 的下载重定向。");
+                if (officialOnly && !MicrosoftUpdateCatalogClient.IsTrustedDownloadUrl(current.AbsoluteUri))
+                    throw new IOException("目录下载或重定向地址不在微软官方 HTTPS 下载域白名单内。");
+                var request = (HttpWebRequest)WebRequest.Create(current);
+                request.Method = "GET"; request.AddRange(start, start);
+                request.AllowAutoRedirect = false; request.UseDefaultCredentials = false;
+                request.Timeout = 30000; request.ReadWriteTimeout = 15000;
+                request.UserAgent = "WuMgr-Driver/CatalogFix";
+                request.AutomaticDecompression = DecompressionMethods.None;
+                request.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
+                using (token.Register(request.Abort))
                 {
-                    var uri = response.ResponseUri;
-                    if ((uri.Scheme != "http" && uri.Scheme != "https") || !String.IsNullOrEmpty(uri.UserInfo)) throw new IOException("不允许的下载重定向地址。");
-                    if (new Uri(url).Scheme == "https" && uri.Scheme != "https") throw new IOException("拒绝从 HTTPS 降级到 HTTP 的下载重定向。");
-                    var result = new RemoteFile { Url = uri.AbsoluteUri, Length = response.ContentLength, ETag = response.Headers["ETag"], LastModified = response.Headers["Last-Modified"] };
-                    if (result.ETag != null && result.ETag.StartsWith("W/", StringComparison.OrdinalIgnoreCase)) result.ETag = null;
-                    if (response.StatusCode == HttpStatusCode.PartialContent)
+                    HttpWebResponse response;
+                    try { response = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false); }
+                    catch (WebException ex) { token.ThrowIfCancellationRequested(); if (ex.Response != null) ex.Response.Dispose(); throw; }
+                    using (response)
                     {
-                        var range = response.Headers["Content-Range"];
-                        string prefix = "bytes " + start + "-" + start + "/";
-                        long size;
-                        if (range == null || !range.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) || !Int64.TryParse(range.Substring(prefix.Length), out size) || size <= start || response.ContentLength != 1)
-                            throw new IOException("服务器返回无效的 Content-Range。");
-                        result.Length = size; result.Ranges = true;
+                        int code = (int)response.StatusCode;
+                        if (code == 301 || code == 302 || code == 303 || code == 307 || code == 308)
+                        {
+                            Uri next;
+                            if (redirects == 5 || !Uri.TryCreate(current, response.Headers["Location"], out next))
+                                throw new IOException("下载重定向次数过多或 Location 无效。");
+                            current = next;
+                            continue;
+                        }
+                        if (code != 200 && code != 206) throw new IOException("下载服务器返回非预期状态：" + code);
+                        var result = new RemoteFile { Url = current.AbsoluteUri, Length = response.ContentLength, ETag = response.Headers["ETag"], LastModified = response.Headers["Last-Modified"] };
+                        if (result.ETag != null && result.ETag.StartsWith("W/", StringComparison.OrdinalIgnoreCase)) result.ETag = null;
+                        if (response.StatusCode == HttpStatusCode.PartialContent)
+                        {
+                            var range = response.Headers["Content-Range"];
+                            string prefix = "bytes " + start + "-" + start + "/";
+                            long size;
+                            if (range == null || !range.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) || !Int64.TryParse(range.Substring(prefix.Length), out size) || size <= start || response.ContentLength != 1)
+                                throw new IOException("服务器返回无效的 Content-Range。");
+                            result.Length = size; result.Ranges = true;
+                        }
+                        return result;
                     }
-                    return result;
                 }
             }
+            throw new IOException("下载重定向次数过多。");
         }
 
         private static DriverResumeState ReadState(string path, string part, string url, RemoteFile remote)

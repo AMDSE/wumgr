@@ -38,7 +38,7 @@ namespace wumgr
             return revisionNumber >= 0 ? criteria + " and RevisionNumber=" + revisionNumber : criteria;
         }
         public static bool HasDownloadedPackage(DriverInfo driver) { return driver != null && string.Equals(driver.Status, DownloadedStatus, StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(driver.LocalPath) && Directory.Exists(driver.LocalPath); }
-        public static string ValidateDriver(DriverInfo driver) { if (driver == null) return "驱动项为空。"; if (!IsValidUpdateId(driver.Id)) return "UpdateID 不是有效 GUID。"; if (!HasDownloadedPackage(driver)) return "必须先成功下载驱动（状态为“已下载”且本地目录存在）。"; return null; }
+        public static string ValidateDriver(DriverInfo driver) { if (driver == null) return "驱动项为空。"; if (driver.Source != "Windows Update Agent") return "目录候选仅允许下载，不能作为 WUA 适用更新安装；请通过系统或厂商确认适用性。"; if (!IsValidUpdateId(driver.Id)) return "UpdateID 不是有效 GUID。"; if (!HasDownloadedPackage(driver)) return "必须先成功下载驱动（状态为“已下载”且本地目录存在）。"; return null; }
         public Task<DriverInstallSummary> InstallAsync(IList<DriverInfo> drivers, CancellationToken token, IProgress<DriverDownloadProgress> progress) { return InstallAsync(drivers, token, progress, null); }
         public Task<DriverInstallSummary> InstallAsync(IList<DriverInfo> drivers, CancellationToken token, IProgress<DriverDownloadProgress> progress, IWuaFactory factory)
         {
@@ -63,13 +63,13 @@ namespace wumgr
                 object session = null, searcher = null, searchResult = null, found = null, update = null, collection = null, downloader = null, downloadResult = null, installer = null, installation = null, itemResult = null;
                 try
                 {
-                    driver.Status = "正在验证驱动…"; Report(progress, i, drivers.Count, 5, driver.Title, "正在通过 Windows Update Agent 验证驱动身份和适用性…"); CheckCanceled(token, result, drivers, i, progress);
+                    driver.Status = "正在验证驱动…"; Report(progress, i, drivers.Count, 5, driver.Title, "正在通过 Windows Update Agent 重新验证驱动身份和适用性（目录硬件匹配不等于系统适用）…"); CheckCanceled(token, result, drivers, i, progress);
                     session = factory.CreateSession(); searcher = ((dynamic)session).CreateUpdateSearcher(); searchResult = ((dynamic)searcher).Search(BuildDriverSearchCriteria(driver.Id, driver.RevisionNumber));
                     CheckCanceled(token, result, drivers, i, progress);
                     if (Convert.ToInt32(((dynamic)searchResult).ResultCode) != 2) throw new InvalidOperationException("WUA 身份查询未完全成功，拒绝安装。 ");
                     found = ((dynamic)searchResult).Updates;
                     for (int n = 0; n < (int)((dynamic)found).Count; n++) { object candidate = ((dynamic)found).Item(n); if (IsApplicableDriver(candidate, driver.Id, driver.RevisionNumber)) { update = candidate; break; } Release(candidate); }
-                    if (update == null) throw new InvalidOperationException("WUA 未返回匹配的、适用且未隐藏的驱动更新。");
+                    if (update == null) throw new InvalidOperationException("WUA 未返回匹配的、适用且未隐藏的驱动更新；目录包仅保留下载，不强制安装或绕过系统检查。");
                     if (!IsEulaAccepted(update)) throw new InvalidOperationException("驱动 EULA 尚未接受或读取失败；程序不会代替用户接受法律条款。");
                     driver.Status = "正在使用系统缓存下载…"; Report(progress, i, drivers.Count, 20, driver.Title, "正在使用 Windows Update 系统缓存准备驱动（不执行本地下载文件）…"); CheckCanceled(token, result, drivers, i, progress);
                     collection = factory.CreateUpdateCollection(); ((dynamic)collection).Add(update); downloader = ((dynamic)session).CreateUpdateDownloader(); ((dynamic)downloader).Updates = collection; downloadResult = ((dynamic)downloader).Download();
@@ -97,7 +97,7 @@ namespace wumgr
         private static void CheckCanceled(CancellationToken token, DriverInstallSummary result, IList<DriverInfo> drivers, int index, IProgress<DriverDownloadProgress> progress) { if (token.IsCancellationRequested) { result.Canceled = true; MarkCanceled(result, drivers, index, progress); throw new OperationCanceledException(); } }
         private static void MarkCanceled(DriverInstallSummary result, IList<DriverInfo> drivers, int start, IProgress<DriverDownloadProgress> progress) { result.Canceled = true; for (int n = Math.Max(0, start); n < drivers.Count; n++) if (drivers[n] != null && !drivers[n].Status.StartsWith("已安装", StringComparison.Ordinal)) { drivers[n].Status = "安装已取消"; Report(progress, n, drivers.Count, 0, drivers[n].Title, "安装已取消。"); } }
         private static void Fail(DriverInstallSummary summary, DriverInfo driver, string message, IProgress<DriverDownloadProgress> progress, int index, int total) { summary.FailedCount++; summary.Errors.Add(message); if (driver != null) { driver.Status = "安装失败"; WriteLog(summary, driver, message); } Report(progress, index, total, 0, driver == null ? "驱动" : driver.Title, message); }
-        private static void WriteLog(DriverInstallSummary summary, DriverInfo driver, string message) { try { File.AppendAllText(Path.Combine(driver.LocalPath, "安装日志.txt"), DateTime.Now.ToString("s") + " " + message + Environment.NewLine); } catch (Exception ex) { summary.Errors.Add((driver.Title ?? "驱动") + "：安装日志写入失败（不影响安装结果）：「" + ex.Message + "」"); } }
+        private static void WriteLog(DriverInstallSummary summary, DriverInfo driver, string message) { try { File.AppendAllText(Path.Combine(driver.LocalPath, "安装日志.txt"), DateTime.Now.ToString("s") + " 来源=" + driver.Source + " UpdateID=" + driver.Id + " 目录=" + driver.CatalogUrl + " " + message + Environment.NewLine); } catch (Exception ex) { summary.Errors.Add((driver.Title ?? "驱动") + "：安装日志写入失败（不影响安装结果）：「" + ex.Message + "」"); } }
         private static void Report(IProgress<DriverDownloadProgress> progress, int index, int total, int percent, string title, string message) { if (progress == null) return; try { progress.Report(new DriverDownloadProgress { Percent = total == 0 ? percent : (index * 100 + percent) / total, Message = (title ?? "驱动") + "：" + message }); } catch { } }
         private static void Release(object value) { try { if (value != null && Marshal.IsComObject(value)) Marshal.FinalReleaseComObject(value); } catch { } }
     }

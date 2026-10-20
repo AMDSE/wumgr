@@ -1,0 +1,763 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" html lang="en">
+<head id="Head1"><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=7" /><link rel="stylesheet" type="text/css" href="Style/catalog.css" /><title>
+	Microsoft Update Catalog
+</title><script type="text/javascript">
+	function supressError(message, url, line)
+	{
+	  var re = /^function\s*([^(]*)\s*\(([^)]*)\)/;
+	  var matches = null;
+	  if (arguments.caller != null) {
+	    matches = re.exec(arguments.caller.callee);
+	  }
+	  var argArray = new Array();
+	  var fName = 'unknown';
+	  if(matches)
+	  {
+	    if(matches[1] && matches[1].toString().length > 0)
+	       fName = matches[1].toString();
+	    if(matches[2] && matches[2].toString().length > 0)
+	    {
+	       var cleanMatches = new String(matches[2]).replace(/\s*/g,'');
+	       argArray = cleanMatches.split(',');
+	    }
+	  }
+	  var args = (argArray.length>0)?'':'none';
+	  for(var i=0; i<argArray.length; i++)
+	  {
+	    args += ((args=='')?'':', ') + argArray[i] + '(' + typeof(arguments.caller[i]) + '):';
+	    args += arguments.caller[i];
+	  }
+	  if(typeof(logger) != typeof(undefined) && logger != null)
+	    logger.log(logger.logLevelFatal, 'JavaScript Error: MESSAGE='+ message + '. URL=' + url + '. LINE='+ line + '. FUNCTION_NAME=' + fName +'. ARGUMENTS=' + args);
+	  else if(typeof(console) != typeof(undefined) && console != null)
+	    console.log('JavaScript Error: MESSAGE='+ message + '. URL=' + url + '. LINE='+ line + '. FUNCTION_NAME=' + fName +'. ARGUMENTS=' + args);
+	  var location = window.location.href.toLowerCase();
+	  if(location.indexOf('ErrorInline.aspx'.toLowerCase()) == -1)
+	    window.location.href = 'ErrorInline.aspx'  + '?id=' + Microsoft.UpdateServices.Catalog.Constants.ErrorScriptError;
+	  return true;
+	}
+	window.onerror = supressError;
+</script></head>
+<body class="mainBody" id="ltr">
+    <form method="post" action="./ScopedViewInline.aspx?updateid=027e8668-e62d-411f-a4a8-7ad2a44d8d09" id="scopedViewInline">
+<div class="aspNetHidden">
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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" />
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['scopedViewInline'];
+if (!theForm) {
+    theForm = document.scopedViewInline;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/WebResource.axd?d=pynGkmcFUV13He1Qd6_TZALGanSi00j8gtzG-IM1N1ERUaYLYyV7UPjnsz3ay2CZu2fVR72QDW9tWmS6jBd9Xw2&amp;t=639242231464565748" type="text/javascript"></script>
+
+
+<script src="/ScriptResource.axd?d=NJmAwtEo3Ipnlaxl6CMhvgGWHQrxq-O0aTfIlkKl2wcVs4ftzaT75CdbyFmuh_1t1YInp5XgR0Khrs4G9Uqw9rTHZRZZez1Td4flsH4N5U8MuH72WsJrx_vtx-6SsDBMEI_ES4dnSCvNn5rE74lCbHM3jAZgkAfU24jScjXylY81&amp;t=ffffffffbec1863d" type="text/javascript"></script>
+<script src="/ScriptResource.axd?d=dwY9oWetJoJoVpgL6Zq8OMuGIey6-cOeN27DfCCoofQLIfIDVRpzez7zEm90FZjFdaGdHc6xikjlC1Y9Uz2dQSw6-TqxjbYV3rY7rm2Klcgzsyd3aTsbmnMfVynU6VO2g2MhMlf2gWuixgwyJP2suP1dxROaD7Ecl5C6IhdySoQ1&amp;t=ffffffffbec1863d" type="text/javascript"></script>
+<script src="SiteConstants.aspx?6" type="text/javascript"></script>
+<script src="Script/CommonTypes.js?6" type="text/javascript"></script>
+<script src="Script/DownloadBasket.js?6" type="text/javascript"></script>
+<script src="Script/MasterComponents.js?6" type="text/javascript"></script>
+<script src="Script/ScopedView.js?6" type="text/javascript"></script>
+<script src="Script/HelperMethods.js?6" type="text/javascript"></script>
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="015E8938" />
+</div>
+        <script type="text/javascript" language="javascript">
+        function pageLoad()
+        {           
+            pageLoadHelper("true");
+        }
+        </script>
+
+        <div class="inlinePadding">
+            <div id="scopedViewHeaderTitleBox" class="dialogHeader" role="banner">
+                <span id="scopedViewHeaderTitleResource">Update Details</span>
+            </div>
+            
+ <div id="contentSection" role="contentinfo">
+       <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('ScopedViewHandler$scriptManager', 'scopedViewInline', [], [], [], 90, '');
+//]]>
+</script>
+
+    
+    <script type="text/javascript" language="javascript">
+        var scopedViewComponent;
+        var binarySize = new Array();
+
+        ///<summary>
+        ///     This function is called automatically by ASP.NET AJAX framework when the page finishes loading
+        ///</summary>
+        function pageLoadHelper(details)
+        {           
+           var downloadButton = $get('downloadButton'); 
+           var uId = '027e8668-e62d-411f-a4a8-7ad2a44d8d09';
+           var addToBasketLabel = 'Add to Basket';
+           var removeFromBasketLabel = 'Remove from Basket';
+           var sizeContainer = $get('ScopedViewHandler$size'.replace(/\$/g, '_'));
+           var updateBasketLabel = 'Update Basket';           
+           if(details != "true")
+           {
+                // Get the MasterPageContext object
+                var masterPageContext = createMasterPageComponents(true);
+                if(masterPageContext == null)
+                {
+                    return;
+                }
+                
+                if(typeof(downloadButton) != typeof(Microsoft.UpdateServices.Catalog.Constants.UndefinedValue)
+                    && downloadButton != null)
+                {
+                    downloadButton.value = 'Download Now';
+                    $addHandler(downloadButton, "click", function () { 
+                        //pass in the updateid, size and languages info as language info is needed to know what binaries to downlaod and 
+                        //language info and size info is needed to add the update back to basket if the update is failed or cancled in download process
+                        var updateIDLang = uId 
+                        //if all the check box is present then the language selection is present
+                        var allCheckbox = $get('allLan')    
+                        if(typeof(allCheckbox) != typeof(Microsoft.UpdateServices.Catalog.Constants.UndefinedValue) && allCheckbox != null)
+                        {
+                            updateIDLang += Microsoft.UpdateServices.Catalog.Constants.UpdateInfoSeparator+  scopedViewComponent.getTotalSize() +  scopedViewComponent.getLangSelected(); 
+                        }
+                        //serialize the update selection so on the server this can be de-serialized uing Jason
+                        var serializedUpdateInfo = Sys.Serialization.JavaScriptSerializer.serialize([new Microsoft.UpdateServices.Catalog.Update(updateIDLang)]);
+                        masterPageContext.get_basketForm().updateIDs.value = serializedUpdateInfo;
+                            
+                        var qs = new Microsoft.UpdateServices.Catalog.QueryString(window.location.search);
+                        var downloadDialog = window.open(Microsoft.UpdateServices.Catalog.Constants.PageDownloadDialog + qs.appendErrorsQS("?scopedview=true"),
+                                                Microsoft.UpdateServices.Catalog.Constants.EmptyString,
+                                                'height=460,width=640,status=no,toolbar=no,menubar=no,location=no,scrollbars=yes,resizable=1 ');
+                        if(downloadDialog == null)
+                        {
+                            popupInfo.style.display = "block";
+                        }
+                    });
+                    downloadButton.style.display = "inline";           
+                }
+           }
+           //get all the language elements and attach event to them and build an array to pass to js
+            var inputElments = languageBox.getElementsByTagName("input");
+            var languageCheckboxes = new Array();            
+            for(i=0; i<inputElments.length; i++ )
+            {
+                if(inputElments[i].type == "checkbox" && inputElments[i].id != "allLan")
+                { 
+                    languageCheckboxes.push(inputElments[i]);              
+                    attachEventToCheckbox(inputElments[i]); 
+                }
+            }
+            //add event handler to all language checkbox  
+            var allCheckbox = $get('allLan')
+            if (typeof(allCheckbox) != typeof(Microsoft.UpdateServices.Catalog.Constants.UndefinedValue) && allCheckbox != null) {
+                $addHandler(allCheckbox, "click", function () { scopedViewComponent.allLanguageSelected(); }); 
+            }
+
+            scopedViewComponent = new Microsoft.UpdateServices.Catalog.UI.ScopedView(
+                                            $get('contentSection'), 
+                                            uId, 
+                                            addToBasketLabel, 
+                                            removeFromBasketLabel,
+                                            $get('overView'),
+                                            $get('overviewBox'),
+                                            $get('packageDetails'),
+                                            $get('packageBox'),
+                                            $get('installDetails'),
+                                            $get('installBox'),
+                                            $get('languageSelection'),
+                                            $get('languageBox'),
+                                            languageCheckboxes,
+                                            "",
+                                            sizeContainer,
+                                            updateBasketLabel,
+                                            allCheckbox,
+                                            downloadButton,
+                                            binarySize //array of binary size per locale
+                                            );       
+
+            $addHandler($get('overView'), 'keydown', TextBox_OnKeyDownOverview);
+            $addHandler($get('languageSelection'), 'keydown', TextBox_OnKeyDownLanguage);
+            $addHandler($get('packageDetails'), 'keydown', TextBox_OnKeyDownPackage);
+            $addHandler($get('installDetails'), 'keydown', TextBox_OnKeyDownDetails);
+
+            $get('overView').setAttribute("aria-selected", "true");
+            $get('languageSelection').setAttribute("aria-selected", "false");
+            $get('installDetails').setAttribute("aria-selected", "false");
+            $get('packageDetails').setAttribute("aria-selected", "false");
+
+            $addHandler(overView, "click", function () { scopedViewComponent.switchTab(1); });
+            $addHandler(packageDetails, "click", function () { scopedViewComponent.switchTab(2); });
+            $addHandler(installDetails, "click", function () { scopedViewComponent.switchTab(3); });
+            $addHandler(languageSelection, "click", function () { scopedViewComponent.switchTab(4); });
+            $addHandler(window, "focus", function () { 
+                if (typeof(scopedViewComponent) != typeof(Microsoft.UpdateServices.Catalog.Constants.UndefinedValue)) {
+                    scopedViewComponent.updateLabels("true");
+                }
+            });
+        }
+        
+        function attachEventToCheckbox(languageCheckbox) {
+            $addHandler(languageCheckbox, "click", function () { scopedViewComponent.manageBasketButton(); });
+        }
+
+
+        function TextBox_OnKeyDownOverview(e)
+        {
+            if (e.keyCode == 39)
+            {
+                $get('languageSelection').focus();
+            }
+        }
+
+        function TextBox_OnKeyDownLanguage(e)
+        {
+            if (e.keyCode == 39)
+            {
+                $get('packageDetails').focus();
+            }
+
+            if (e.keyCode == 37)
+            {
+                $get('overView').focus();
+
+            }
+        }
+
+        function TextBox_OnKeyDownPackage(e)
+        {
+            if (e.keyCode == 39)
+            {
+                $get('installDetails').focus();
+            }
+
+            if (e.keyCode == 37)
+            {
+                $get('languageSelection').focus();
+            }
+        }
+
+        function TextBox_OnKeyDownDetails(e)
+        {
+            if (e.keyCode == 37)
+            {
+                $get('packageDetails').focus();
+            }
+        }
+
+        function copyUpdateidToClipboard() {
+            copyTextToClipboard("027e8668-e62d-411f-a4a8-7ad2a44d8d09");
+        }
+
+        
+
+    </script>
+    <div class="textBottomSpacer labelTitle" id="titleDiv">
+        <span id="ScopedViewHandler_titleText">Intel Net Driver Update (2.1.5.10)</span>
+    </div>
+    <div id="dateDiv" class="textBottomSpacer">
+        <span id="ScopedViewHandler_labelLastModified_Separator" class="labelTitle">Last Modified:</span>
+        <span id="ScopedViewHandler_date">12/29/2025</span>
+    </div>
+    <div id="sizeDiv" class="textBottomSpacer">
+        <span class="labelTitle">Size:</span>
+        <span id="ScopedViewHandler_size">377 KB</span>
+    </div>
+    <div id="updateIdDiv" class="textBottomSpacer">
+        <span class="labelTitle">UpdateID:</span>
+        <span id="ScopedViewHandler_UpdateID">027e8668-e62d-411f-a4a8-7ad2a44d8d09</span>
+        <input id="downloadSettingsUpdateidButton" class="flatBlueButtonDownloadFittext focus-only" type="button" value="Copy" onclick="copyUpdateidToClipboard()">
+        <div id="liveRegion" aria-live="polite" aria-atomic="true" style="position: absolute; left: -9999px;"></div>
+    </div>
+    <div id="buttonsDiv">
+        <input id="downloadButton" class="flatBlueButton buttonPadding" type="button" style="display: none;" />
+    </div>
+</div>
+<div id="popupInfo" class="poupInfoDiv">
+    <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td valign="top">
+                <img src="Images/decor_BigInformation.gif" />
+            </td>
+            <td class="poupInfoText">
+                <span id="ScopedViewHandler_textPopupBlocked">If you have a pop-up blocker enabled, the Download window might not open. To open the Download window, configure your pop-blocker to allow pop-ups for this Web site.</span>
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="tabSection" role="tablist">
+    <div class="textLeftPadding textTopPadding">
+        <span id="ScopedViewHandler_labelDetails_Separator">Details:</span>
+    </div>
+    <div id="tabContainer">
+        <a href="#Overview" id="overView" aria-selected="false" role="tab" class="tab tabActive" tabindex="1" ><span id="ScopedViewHandler_labelOverview">Overview</span></a>
+        <a href="#LanguageSelection"  id="languageSelection"  aria-selected="false" role="tab" class="tab tabInactive" tabindex="11"><span id="ScopedViewHandler_labelLangSelection">Language Selection</span></a>
+        <a href="#PackageDetails"  id="packageDetails"  aria-selected="false" role="tab" class="tab tabInactive" tabindex="21"><span id="ScopedViewHandler_labelPkgDetails">Package Details</span></a>
+        <a href="#InstallDetails"  id="installDetails"   aria-selected="false" role="tab" class="tab tabInactive" tabindex="31"><span id="ScopedViewHandler_labelInstallDetails">Install Resources</span></a>        
+    </div>
+</div>
+<div id="tabBody" role="main">
+    <div id="overviewBox">
+        <div id="overviewContentBody" class="tabBodyContentBox">
+            <table cellpadding="0" cellspacing="0" border="0" width="95%">
+                <tr>
+                    <td id="overviewLeftBox">
+                        <div id="descDiv" class="textDoubleSpacer">
+                            <span id="ScopedViewHandler_labelDescription_Separator" class="labelTitle">Description:</span>
+                            <span id="ScopedViewHandler_desc">Intel Net  driver update released in  December 2025</span>
+                        </div>
+                        
+                        <div id="archDiv">
+                            <span id="ScopedViewHandler_labelArchitecture_Separator" class="labelTitle">Architecture:</span>
+                            
+                                    AMD64
+                                
+                        </div>
+                        <div id="classificationDiv">
+                            <span id="ScopedViewHandler_labelClassification_Separator" class="labelTitle">Classification:</span>
+                            
+                                    Drivers
+                                
+                        </div>                        
+                        <div id="productsDiv">
+                            <span id="ScopedViewHandler_labelSupportedProducts_Separator" class="labelTitle">Supported products:</span>
+                            
+                                    Windows 11 Client, version 24H2 and later, Servicing Drivers
+                                , 
+                                    Windows 11 Client, version 24H2 and later, Upgrade &amp; Servicing Drivers
+                                
+                        </div>
+                        <div id="languagesDiv">
+                            <span id="ScopedViewHandler_labelSupportedLanguages_Separator" class="labelTitle">Supported languages:</span>
+                            
+                                    Arabic
+                                , 
+                                    Bulgarian
+                                , 
+                                    Chinese (Traditional)
+                                , 
+                                    Czech
+                                , 
+                                    Danish
+                                , 
+                                    German
+                                , 
+                                    Greek
+                                , 
+                                    English
+                                , 
+                                    Spanish
+                                , 
+                                    Finnish
+                                , 
+                                    French
+                                , 
+                                    Hebrew
+                                , 
+                                    Hungarian
+                                , 
+                                    Italian
+                                , 
+                                    Japanese
+                                , 
+                                    Korean
+                                , 
+                                    Dutch
+                                , 
+                                    Norwegian
+                                , 
+                                    Polish
+                                , 
+                                    Portuguese (Brazil)
+                                , 
+                                    Romanian
+                                , 
+                                    Russian
+                                , 
+                                    Croatian
+                                , 
+                                    Slovak
+                                , 
+                                    Swedish
+                                , 
+                                    Thai
+                                , 
+                                    Turkish
+                                , 
+                                    Ukrainian
+                                , 
+                                    Slovenian
+                                , 
+                                    Estonian
+                                , 
+                                    Latvian
+                                , 
+                                    Lithuanian
+                                , 
+                                    Chinese (Simplified)
+                                , 
+                                    Portuguese (Portugal)
+                                , 
+                                    Serbian (Latin)
+                                , 
+                                    Chinese - Hong Kong SAR
+                                
+                        </div>
+                    </td>
+                    <td id="overviewRightBox">
+                        
+                        <div id="ScopedViewHandler_DriverInfo">
+                            <div id="companyDiv">
+                                <span id="ScopedViewHandler_labelCompany_Separator" class="labelTitle">Company:</span>
+                                <span id="ScopedViewHandler_company">Wistron Corporation</span>
+                            </div>
+                            <div id="manufacturerDiv">
+                                <span id="ScopedViewHandler_labelDriverManufacturer_Separator" class="labelTitle">Driver Manufacturer:</span>
+                                <span id="ScopedViewHandler_labelSeparator" class="labelTitle"></span>
+                                <span id="ScopedViewHandler_manufacturer">Intel</span>
+                            </div>
+                            <div id="driverClassDiv">
+                                <span id="ScopedViewHandler_labelDriverClass_Separator" class="labelTitle">Driver Class:</span>
+                                <span id="ScopedViewHandler_driverClass">Networking</span>
+                            </div>                            
+                            <div id="driverModelDiv">
+                                <span id="ScopedViewHandler_labelDriverModel_Separator" class="labelTitle">Driver Model:</span>
+                                <span id="ScopedViewHandler_driverModel">Intel(R) Ethernet Controller I225-V,Intel(R) Ethernet Controller (2) I225-V,Intel(R) Ethernet Controller (3) I225-V,Intel(R) Ethernet Controller I226-V</span>
+                            </div>
+                            <div id="driverProviderDiv">
+                                <span id="ScopedViewHandler_labelDriverProvider_Separator" class="labelTitle">Driver Provider:</span>
+                                <span id="ScopedViewHandler_driverProvider">Intel</span>
+                            </div>
+                            <div id="versionDiv">
+                                <span id="ScopedViewHandler_labelDriverVersion_Separator" class="labelTitle">Version:</span>
+                                <span id="ScopedViewHandler_version">2.1.5.10</span>
+                            </div>
+                            <div id="versionDateDiv" class="textDoubleSpacer">
+                                <span id="ScopedViewHandler_labelDriverVersionDate_Separator" class="labelTitle">Version Date:</span>
+                                <span id="ScopedViewHandler_versionDate">12/29/2025</span>
+                            </div>
+                        </div>
+                        <div id="moreInfoDiv" class="textDoubleSpacer">
+                            <span id="ScopedViewHandler_labelMoreInfo_Separator" class="labelTitle">More information:</span>
+                            
+                                    <div>
+                                        <a target="catalogNew" tabindex="2" href="https://learn.microsoft.com/en-us/windows-hardware/drivers/dashboard/hardware-submission-support" class ="contentTextItemSpacerNoBreakLink">
+                                            https://learn.microsoft.com/en-us/windows-hardware/drivers/dashboard/hardware-submission-support
+                                        </a>
+                                    </div>
+                                
+                        </div>
+                        <div id="suportUrlDiv" class="textDoubleSpacer">
+                            <span id="ScopedViewHandler_labelSupportUrl_Separator" class="labelTitle">Support Url:</span>
+                            
+                                    <div>
+                                        <a target="catalogNew" tabindex="3" href="https://support.microsoft.com/select/?target=hub" class = "contentTextItemSpacerNoBreakLink">
+                                            https://support.microsoft.com/select/?target=hub
+                                        </a>
+                                    </div>
+                                
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="packageBox" style="display: none">
+        
+        <div id="ScopedViewHandler_driverPackage">
+            <div class="tabBodyContentBox tabDriverPackageBodyContentBox boxTitleContainer">
+                <span id="ScopedViewHandler_labelSupportedHWIDs" class="boxTitleDetails">Supported Hardware IDs</span>
+                <div class="tabDriverPackageContentBox" id="driverhwIDs" TABINDEX="1">
+                    
+                            <div style="padding-bottom: 0.3em;">
+                                pci\ven_8086&amp;dev_15f3&amp;rev_01
+                            </div>
+                        
+                            <div style="padding-bottom: 0.3em;">
+                                pci\ven_8086&amp;dev_15f3&amp;rev_02
+                            </div>
+                        
+                            <div style="padding-bottom: 0.3em;">
+                                pci\ven_8086&amp;dev_15f3&amp;rev_03
+                            </div>
+                        
+                            <div style="padding-bottom: 0.3em;">
+                                pci\ven_8086&amp;dev_125c
+                            </div>
+                        
+                </div>
+            </div>
+            <div class="tabBodyContentBox tabDriverPackageBodyContentBox boxTitleContainer">
+                <span id="ScopedViewHandler_labelSupportedUpdateIDs" class="boxTitleDetails">Supported Update IDs</span>
+                <div class="tabDriverPackageContentBox" id="driverupdateIDs" TABINDEX="1">
+                    
+                            <div style="padding-bottom: 0.3em;">
+                                027e8668-e62d-411f-a4a8-7ad2a44d8d09
+                            </div>
+                        
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="languageBox" style="display: none">
+        <div id="ScopedViewHandler_Div2">
+            <div id ="languageContentBody" class="tabBodyContentBox boxTitleContainer">
+                
+                        <table width="90%" cellpadding="0" cellspacing="0" border="0">
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Arabic</span>
+                            </td>
+                    
+                            <td>
+                                <span>Bulgarian</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Chinese (Traditional)</span>
+                            </td>
+                    
+                            <td>
+                                <span>Czech</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Danish</span>
+                            </td>
+                    
+                            <td>
+                                <span>German</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Greek</span>
+                            </td>
+                    
+                            <td>
+                                <span>English</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Spanish</span>
+                            </td>
+                    
+                            <td>
+                                <span>Finnish</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>French</span>
+                            </td>
+                    
+                            <td>
+                                <span>Hebrew</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Hungarian</span>
+                            </td>
+                    
+                            <td>
+                                <span>Italian</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Japanese</span>
+                            </td>
+                    
+                            <td>
+                                <span>Korean</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Dutch</span>
+                            </td>
+                    
+                            <td>
+                                <span>Norwegian</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Polish</span>
+                            </td>
+                    
+                            <td>
+                                <span>Portuguese (Brazil)</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Romanian</span>
+                            </td>
+                    
+                            <td>
+                                <span>Russian</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Croatian</span>
+                            </td>
+                    
+                            <td>
+                                <span>Slovak</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Swedish</span>
+                            </td>
+                    
+                            <td>
+                                <span>Thai</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Turkish</span>
+                            </td>
+                    
+                            <td>
+                                <span>Ukrainian</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Slovenian</span>
+                            </td>
+                    
+                            <td>
+                                <span>Estonian</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Latvian</span>
+                            </td>
+                    
+                            <td>
+                                <span>Lithuanian</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Chinese (Simplified)</span>
+                            </td>
+                    
+                            <td>
+                                <span>Portuguese (Portugal)</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td style="width:50%" class="textAlignLeft">
+                                <span>Serbian (Latin)</span>
+                            </td>
+                    
+                            <td>
+                                <span>Chinese - Hong Kong SAR</span>
+                            </td>
+                        </tr>
+                    
+                        </table>
+                    
+                
+            </div>
+        </div>
+    </div>
+    <div id="installBox" style="display: none">       
+        <div class="tabBodyContentBox" TABINDEX="1">
+            <div id="rebootBehaviorDiv">
+                <span id="ScopedViewHandler_labelRebooBehavior_Separator" class="labelTitle">Restart behavior:</span>
+                <span id="ScopedViewHandler_rebootBehavior">Can request restart</span>
+            </div>
+            <div id="userInputDiv">
+                <span id="ScopedViewHandler_labelRequiresInput_Separator" class="labelTitle">May request user input:</span>
+                <span id="ScopedViewHandler_userInput">No</span>
+            </div>
+            <div id="installationImpactDiv">
+                <span id="ScopedViewHandler_labelInstallationImpact_Separator" class="labelTitle">Must be installed exclusively:</span>
+                <span id="ScopedViewHandler_installationImpact"></span>
+            </div>
+            <div id="connectivityDiv">
+                <span id="ScopedViewHandler_labelInstallRequiresConnectivity_Separator" class="labelTitle">Requires network connectivity:</span>
+                <span id="ScopedViewHandler_connectivity">No</span>
+            </div>            
+            <div id="uninstallNotesDiv">                
+                <span id="ScopedViewHandler_labelUninstallNotes_Separator" class="labelTitle">Uninstall Notes:</span>
+                
+                        <div>
+                            n/a
+                        </div>
+                    
+            </div>
+             <div id="uninstallStepsDiv">                
+                <span id="ScopedViewHandler_labelUninstallSteps_Separator" class="labelTitle">Uninstall Steps:</span>
+                
+                        <div>
+                            n/a
+                        </div>
+                    
+            </div>
+        </div>
+    </div>
+</div>
+<span id="addToBasketButtonText" class="notVisible">
+    Add to Basket
+</span><span id="removeFromBasketButtonText" class="notVisible">
+    Remove from Basket
+ </span><span id="updateBasketButtonText" class="notVisible">
+    Update Basket
+</span>
+
+            <div class="inlineCloseButtonCenter textAlignCenter">
+                <a href="#Close" id="close" role="button" onclick="window.close()" class="flatBlueButtonClose flatBlueButtonGeneric" ><span id="labelOverview">Close</span></a>
+            </div>
+        </div>
+    </form>
+</body>
+</html>

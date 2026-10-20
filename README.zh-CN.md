@@ -1,3 +1,10 @@
+> ## V8 / V10 微软目录深度修复包
+> 已接入真实 Microsoft Update Catalog 硬件检索、`p` 参数翻页、详情完整硬件 ID 核验与官方 HTTPS 包链接解析。**目录候选只下载、不冒充 WUA 更新安装；旧包和独立 WPF Preview 2 均不变。** 尚待 Windows 实机验收。
+>
+> [V8 8.0.1 修复完整包](WuMgr-8.0.1-catalog.zip) · [V10 10.0.1 Preview 修复完整包](WuMgr-10.0.1-preview-catalog.zip) · [修复说明](目录驱动修复说明.md) · [SHA-256](SHA256SUMS-catalog.txt) · [V8 对 v8.0.0 的源码补丁](v8.0.1-catalog-from-v8.0.0.patch)
+>
+> 两包均含程序、完整对应源码、许可证、离线回归测试及在线协议日志。[在线验证结果](docs/Catalog验证结果.md)：真实两页 50 条不同更新，详情四条硬件 ID，官方下载地址解析成功；这不是 Windows WUA/安装实机验收。
+
 ## WPF Preview 2（与 WinForms 并存）
 
 [下载 WPF Preview 2 完整包](https://github.com/AMDSE/wumgr/releases/tag/wpf-preview-2) · [WPF 中文指南](wpf/preview-2/README-WPF.zh-CN.md) · [English guide](wpf/preview-2/README-WPF.en.md) · [独立源码](wpf/preview-2) · [SHA-256](SHA256SUMS-WPF-preview-2.txt)

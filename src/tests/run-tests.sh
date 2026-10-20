@@ -62,3 +62,12 @@ mkdir -p docs/images
 xvfb-run -a -s '-screen 0 1440x1100x24' mono wumgr/bin/Release/wumgr.exe --preview "$PWD/artifacts/中文驱动界面-演示.png" --lang zh-CN
 xvfb-run -a -s '-screen 0 1440x1100x24' mono wumgr/bin/Release/wumgr.exe --preview "$PWD/docs/images/driver-center-zh-CN.png" --lang zh-CN
 xvfb-run -a -s '-screen 0 1440x1100x24' mono wumgr/bin/Release/wumgr.exe --preview "$PWD/docs/images/driver-center-en-US.png" --lang en-US
+
+# Catalog integration uses frozen public-page fixtures; no driver installation.
+mcs -langversion:7.2 -r:wumgr/bin/Release/wumgr.exe -r:System.Core -r:System.Net.Http -out:wumgr/bin/Release/CatalogIntegrationTests.exe tests/CatalogIntegrationTests.cs
+mono wumgr/bin/Release/CatalogIntegrationTests.exe tests/fixtures/catalog
+mcs -langversion:7.2 -r:wumgr/bin/Release/wumgr.exe -r:System.Core -r:System.Windows.Forms -r:System.Drawing -out:wumgr/bin/Release/CatalogUiTests.exe tests/CatalogUiTests.cs
+xvfb-run -a mono wumgr/bin/Release/CatalogUiTests.exe
+
+mcs -langversion:7.2 -r:wumgr/bin/Release/wumgr.exe -r:System.Core -r:System.Net.Http -out:wumgr/bin/Release/CatalogClientTests.exe tests/CatalogClientTests.cs
+mono wumgr/bin/Release/CatalogClientTests.exe tests/fixtures/catalog

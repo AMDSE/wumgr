@@ -1,3 +1,10 @@
+> ## Microsoft Catalog fixes for WinForms V8 / V10
+> Real hardware-ID search, current `p` GET pagination, detail identity/hardware checks, and official HTTPS package URLs. **Catalog candidates are download-only, not WUA applicability or installation recommendations.** Windows real-machine acceptance is pending. Old packages and the separate WPF Preview 2 are unchanged.
+>
+> [V8 8.0.1 complete fix package](WuMgr-8.0.1-catalog.zip) · [V10 10.0.1 Preview complete fix package](WuMgr-10.0.1-preview-catalog.zip) · [Fix notes](目录驱动修复说明.md) · [SHA-256](SHA256SUMS-catalog.txt) · [V8 source patch from v8.0.0](v8.0.1-catalog-from-v8.0.0.patch)
+>
+> Both packages include executable files, complete corresponding source, licenses and regression logs. Live protocol validation read 50 distinct updates over two pages, all four hardware IDs in a real detail, and official download URLs. This is not Windows WUA or installation acceptance.
+
 ## WPF Preview 2 (alongside WinForms)
 
 [Download the complete WPF Preview 2 package](https://github.com/AMDSE/wumgr/releases/tag/wpf-preview-2) · [English WPF guide](wpf/preview-2/README-WPF.en.md) · [中文指南](wpf/preview-2/README-WPF.zh-CN.md) · [Separate source](wpf/preview-2) · [SHA-256](SHA256SUMS-WPF-preview-2.txt)

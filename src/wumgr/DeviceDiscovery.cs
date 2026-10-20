@@ -66,6 +66,13 @@ namespace wumgr
             return result;
         }
 
+        public static bool MatchHardwareId(LocalDeviceInfo device, string id)
+        {
+            if (device == null || String.IsNullOrWhiteSpace(id)) return false;
+            string wanted = Normalize(id);
+            return (device.HardwareIds ?? new List<string>()).Concat(device.CompatibleIds ?? new List<string>()).Any(x => Normalize(x) == wanted);
+        }
+
         public static List<DriverInfo> SelectAutomatic(IEnumerable<LocalDeviceInfo> devices, IEnumerable<DriverInfo> candidates)
         {
             var result = new List<DriverInfo>();
@@ -77,7 +84,7 @@ namespace wumgr
                 var matches = Match(device, candidates);
                 var eligible = matches.Where(d => d != null && !d.Superseded
                     && !String.IsNullOrWhiteSpace(d.Id)
-                    && d.DownloadUrls != null && d.DownloadUrls.Any(u => !String.IsNullOrWhiteSpace(u))
+                    && d.CanDownload && d.Source != "Microsoft Update Catalog"
                     && TryVersion(d.Version, out _)
                     && IsNewerThanInstalled(d, device.InstalledVersion)
                     )

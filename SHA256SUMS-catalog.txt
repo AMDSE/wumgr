@@ -1,0 +1,2 @@
+38d1437489ecefa84462967a8106adc335ee578aa7ae35fae54f8b06af18fbda  WuMgr-8.0.1-catalog.zip
+855d17b3442083aba3086e602dcbf74e20389a8124772ddcd1ccc0735c7af691  WuMgr-10.0.1-preview-catalog.zip

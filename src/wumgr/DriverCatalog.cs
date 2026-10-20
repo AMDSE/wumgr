@@ -89,7 +89,8 @@ namespace wumgr
             {
                 // WUA identity is UpdateID + RevisionNumber. A new revision replaces
                 // the old metadata; never mix payload URLs from different revisions.
-                var chosen = pair.Value.OrderByDescending(d => d.RevisionNumber)
+                var chosen = pair.Value.OrderByDescending(d => String.Equals(d.Source, "Windows Update Agent", StringComparison.Ordinal))
+                    .ThenByDescending(d => d.RevisionNumber)
                     .ThenByDescending(d => HasValidUrl(d, validUrls)).First();
                 if (chosen.DownloadUrls == null) chosen.DownloadUrls = new List<string>();
                 afterIds.Add(chosen);
@@ -126,7 +127,7 @@ namespace wumgr
                 validUrls.Add(d, urls);
             }
             if (urls.Count == 0) return null;
-            return TupleKey(d, true) + LengthPrefix(d.Version) + LengthPrefix(d.DriverDate.Ticks.ToString(CultureInfo.InvariantCulture))
+            return LengthPrefix(d.Source) + TupleKey(d, true) + LengthPrefix(d.Version) + LengthPrefix(d.DriverDate.Ticks.ToString(CultureInfo.InvariantCulture))
                 + LengthPrefix(String.Join(";", urls.OrderBy(x => x, StringComparer.Ordinal)));
         }
 

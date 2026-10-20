@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace wumgr
 {
@@ -20,6 +21,24 @@ namespace wumgr
         public bool Superseded { get; set; }
         public decimal Size { get; set; } = 0m;
         public List<string> DownloadUrls { get; set; } = new List<string>();
+        public string Source { get; set; } = "Windows Update Agent";
+        public string DownloadUrlSource { get; set; } = string.Empty;
+        public string CatalogUrl { get; set; } = string.Empty;
+        public string Products { get; set; } = string.Empty;
+        public string Architecture { get; set; } = string.Empty;
+        public bool CatalogHardwareVerified { get; set; }
+        /// <summary>Can start a download, including lazy resolution of a verified Catalog item.</summary>
+        public bool CanDownload
+        {
+            get
+            {
+                Guid id;
+                bool validId = Guid.TryParse(Id, out id);
+                if (Source == "Microsoft Update Catalog")
+                    return CatalogHardwareVerified && validId && (DownloadUrls == null || DownloadUrls.Count == 0 || DownloadUrls.All(MicrosoftUpdateCatalogClient.IsTrustedDownloadUrl));
+                return (DownloadUrls != null && DownloadUrls.Count > 0) || (Source == "Windows Update Agent" && validId);
+            }
+        }
         public string LocalPath { get; set; } = string.Empty;
         public string Status { get; set; } = "未提供";
     }

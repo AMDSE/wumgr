@@ -50,7 +50,7 @@ namespace wumgr
             Cell(deviceSearch, nav, 0, 9, new Padding(0, 2, 0, 2));
             Cell(policyButton, nav, 0, 10, new Padding(0, 2, 0, 2));
             var about = new SoftButton(UiLanguageService.Get("关于与许可")); about.Click += (s, e) => ShowLicense(); Cell(about, nav, 0, 11, new Padding(0, 2, 0, 2));
-            Cell(DriverTheme.Label("10.0 PREVIEW", 8, DriverTheme.Muted), nav, 0, 12, new Padding(8, 0, 0, 0));
+            Cell(DriverTheme.Label("10.0.1 PREVIEW", 8, DriverTheme.Muted), nav, 0, 12, new Padding(8, 0, 0, 0));
 
             var work = Grid(1, 5); work.Padding = new Padding(24, 12, 24, 14); work.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             foreach (int h in new[] { 60, 104, 92, 0, 168 }) work.RowStyles.Add(h == 0 ? new RowStyle(SizeType.Percent, 100) : new RowStyle(SizeType.Absolute, h));

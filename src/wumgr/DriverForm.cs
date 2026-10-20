@@ -94,7 +94,7 @@ namespace wumgr
             cancel.Click += (s, e) => { if (operation != null) { operation.Cancel(); cancel.Enabled = false; status.Text = "正在取消；当前系统查询或安装须等待返回，不会强制中断…"; } };
             browse.Click += (s, e) => { using (var dialog = new FolderBrowserDialog { Description = UiLanguageService.Get("选择驱动包保存文件夹"), SelectedPath = folder.Text }) if (dialog.ShowDialog(this) == DialogResult.OK) { folder.Text = dialog.SelectedPath; SaveFolder(); } };
             open.Click += (s, e) => { try { Directory.CreateDirectory(folder.Text); Process.Start(new ProcessStartInfo(folder.Text) { UseShellExecute = true }); } catch (Exception ex) { Error(UiLanguageService.Get("无法打开下载目录"), ex); } };
-            selectAll.Click += (s, e) => { foreach (var d in VisibleDevices()) { var v = Choice(d); if (v != null && v.DownloadUrls.Count > 0) selected.Add(SelectionKey(v)); } RenderRows(); };
+            selectAll.Click += (s, e) => { foreach (var d in VisibleDevices()) { var v = Choice(d); if (v != null && v.CanDownload) selected.Add(SelectionKey(v)); } RenderRows(); };
             clear.Click += (s, e) => { selected.Clear(); RenderRows(); };
             FormClosing += OnClosing; LoadFolder(); RefreshRows(); ApplyLanguage(); if (demo) Shown += (s, e) => LoadDemo(); UpdateSelection();
         }
@@ -154,9 +154,9 @@ namespace wumgr
                     continue;
                 }
                 var card = new DriverCard(d, Choice(d), selected.Contains(SelectionKey(Choice(d))), expanded.Contains(d.Key), demo);
-                card.CheckChanged = value => { if (value && Choice(d).DownloadUrls.Count > 0) selected.Add(SelectionKey(Choice(d))); else selected.Remove(SelectionKey(Choice(d))); UpdateSelection(); };
+                card.CheckChanged = value => { if (value && Choice(d).CanDownload) selected.Add(SelectionKey(Choice(d))); else selected.Remove(SelectionKey(Choice(d))); UpdateSelection(); };
                 card.ToggleHistory = () => { if (!expanded.Add(d.Key)) expanded.Remove(d.Key); RenderRows(); };
-                card.Choose = v => { bool wasSelected = selected.Remove(SelectionKey(Choice(d))); choices[d.Key] = SelectionKey(v); if (wasSelected && v.DownloadUrls.Count > 0) selected.Add(SelectionKey(v)); RenderRows(); };
+                card.Choose = v => { bool wasSelected = selected.Remove(SelectionKey(Choice(d))); choices[d.Key] = SelectionKey(v); if (wasSelected && v.CanDownload) selected.Add(SelectionKey(v)); RenderRows(); };
                 card.ShowInfo = () => ShowDetails(Choice(d));
                 card.Download = async () => await DownloadItems(new List<DriverInfo> { Choice(d) });
                 list.Controls.Add(card);
@@ -196,9 +196,12 @@ namespace wumgr
                 var found = await discovery.ScanAsync(operation.Token, new Progress<string>(message => status.Text = message));
                 // 先显示真实设备清单：即使更新源失败，也不能把设备当成未识别。
                 localDevices.Clear(); localDevices.AddRange(found); drivers.Clear(); anonymousKeys.Clear(); selected.Clear(); choices.Clear(); expanded.Clear(); RefreshRows();
-                var result = await service.ScanAsync(history.Checked, operation.Token, new Progress<string>(message => status.Text = message));
+                var result = await service.ScanWithCatalogAsync(found, history.Checked, operation.Token, new Progress<string>(message => status.Text = message));
                 drivers.AddRange(DriverCatalog.NormalizeCandidates(result)); RefreshRows(); progress.Value = 100;
-                status.Text = "扫描完成 · 本机 " + found.Count + " 个设备，" + drivers.Count + " 个候选；无候选不代表设备没有驱动"; return true;
+                var diag = service.LastScanDiagnostics ?? new List<string>();
+                status.Text = "扫描完成 · 本机 " + found.Count + " 个设备，" + drivers.Count + " 个候选；无候选不代表设备没有驱动" + (diag.Count > 0 ? "；存在部分失败/截断诊断" : "");
+                if (diag.Count > 0) ShowText("扫描诊断", String.Join("\r\n", diag));
+                return true;
             }
             catch (OperationCanceledException) { status.Text = "扫描已取消，保留已读取的设备清单"; return false; }
             catch (Exception ex) { status.Text = localDevices.Count > 0 ? "本机设备已读取，更新候选扫描失败；可查看设备清单并重试" : "扫描失败，可重试"; Error("无法扫描设备驱动", ex); return false; }
@@ -207,7 +210,19 @@ namespace wumgr
         async Task SearchDevices()
         {
             if (demo || operation != null) return;
-            if (localDevices.Count == 0) { await Scan(); if (localDevices.Count == 0) return; }
+            if (localDevices.Count == 0)
+            {
+                BeginOperation();
+                try
+                {
+                    var found = await discovery.ScanAsync(operation.Token, new Progress<string>(message => status.Text = message));
+                    localDevices.AddRange(found); RefreshRows();
+                }
+                catch (OperationCanceledException) { status.Text = "设备读取已取消"; return; }
+                catch (Exception ex) { Error("无法读取本机设备", ex); return; }
+                finally { EndOperation(); }
+                if (localDevices.Count == 0 || closeAfterCancel) return;
+            }
             using (var dialog = new DeviceSearchForm(localDevices, drivers))
                 if (dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedDriver != null)
                     await DownloadItems(new List<DriverInfo> { dialog.SelectedDriver });
@@ -227,7 +242,8 @@ namespace wumgr
         async Task DownloadItems(List<DriverInfo> items)
         {
             if (demo || operation != null || items.Count == 0) return;
-            bool install = silentInstall.Checked;
+            bool install = silentInstall.Checked && items.All(d => d.Source == "Windows Update Agent");
+            if (silentInstall.Checked && !install) MessageBox.Show(this, UiLanguageService.T("本次包含目录候选，整个批次仅下载，不执行安装。请单独选择 WUA 候选后再启用静默安装。", "This batch includes Catalog candidates and will only download. Select WUA candidates separately for installation."), UiLanguageService.Get("驱动下载中心"), MessageBoxButtons.OK, MessageBoxIcon.Information);
             if (install)
             {
                 if (!DriverInstaller.IsAdministrator()) { MessageBox.Show(this, UiLanguageService.Get("静默安装需要管理员权限。请关闭程序，右键选择“以管理员身份运行”，再重试；仅下载无需管理员权限。"), UiLanguageService.Get("需要管理员权限"), MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
@@ -285,13 +301,13 @@ namespace wumgr
         void OnClosing(object sender, FormClosingEventArgs e) { if (operation == null) return; e.Cancel = true; if (!closeAfterCancel && MessageBox.Show(this, UiLanguageService.Get("任务仍在进行。取消任务后关闭窗口？系统扫描或安装需要等待当前调用返回；已完成安装不会回滚。"), UiLanguageService.Get("退出确认"), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) { closeAfterCancel = true; operation.Cancel(); cancel.Enabled = false; status.Text = "正在取消，完成清理后将自动关闭…"; } }
         void ShowDetails(DriverInfo d)
         {
-            string text = UiLanguageService.Get("设备型号：") + d.DeviceModel + UiLanguageService.Get("\r\n驱动号 / 版本：") + d.Version + UiLanguageService.Get("\r\n硬件标识：") + d.HardwareId + UiLanguageService.Get("\r\n提供商：") + d.Provider + UiLanguageService.Get("\r\n原始类别：") + d.DriverClass + UiLanguageService.Get("\r\n原始名称：") + d.Title + UiLanguageService.Get("\r\n更新标识：") + d.Id + UiLanguageService.Get("\r\n下载状态：") + UiLanguageService.Display(d.Status) + UiLanguageService.Get("\r\n保存位置：") + (String.IsNullOrEmpty(d.LocalPath) ? UiLanguageService.Get("尚未下载") : d.LocalPath) + UiLanguageService.Get("\r\n\r\n版本仅为当前更新源提供的候选，不代表已安装版本。旧版本不一定更适用，安装前请自行核验硬件匹配及供应商签名。");
+            string text = UiLanguageService.Get("设备型号：") + d.DeviceModel + UiLanguageService.Get("\r\n驱动号 / 版本：") + d.Version + UiLanguageService.Get("\r\n硬件标识：") + d.HardwareId + UiLanguageService.Get("\r\n提供商：") + d.Provider + UiLanguageService.Get("\r\n原始类别：") + d.DriverClass + UiLanguageService.Get("\r\n原始名称：") + d.Title + UiLanguageService.Get("\r\n更新标识：") + d.Id + UiLanguageService.Get("\r\n来源：") + UiLanguageService.Display(d.Source) + UiLanguageService.Get("\r\n产品：") + d.Products + UiLanguageService.Get("\r\n架构：") + d.Architecture + UiLanguageService.Get("\r\n目录链接：") + d.CatalogUrl + UiLanguageService.Get("\r\n下载状态：") + UiLanguageService.Display(d.Status) + UiLanguageService.Get("\r\n保存位置：") + (String.IsNullOrEmpty(d.LocalPath) ? UiLanguageService.Get("尚未下载") : d.LocalPath) + UiLanguageService.Get("\r\n\r\n版本仅为当前更新源提供的候选，不代表已安装版本。旧版本不一定更适用，安装前请自行核验硬件匹配及供应商签名。");
             ShowText(UiLanguageService.Get("驱动详情"), text);
         }
         void ShowText(string title, string text) { using (var dialog = new Form { Text = title, Size = new Size(760, 510), StartPosition = FormStartPosition.CenterParent, Font = Font, Padding = new Padding(22), BackColor = Color.White }) { dialog.Controls.Add(new TextBox { Dock = DockStyle.Fill, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, BorderStyle = BorderStyle.None, BackColor = Color.White, Text = text }); dialog.ShowDialog(this); } }
         void ShowLicense()
         {
-            string legal = UiLanguageService.Get("WuMgr 驱动下载中心 9.0 Preview · 中英文修改版\r\n原项目：Copyright © DavidXanatos 2018-2020\r\n上游：https://github.com/DavidXanatos/wumgr\r\n本修改版依据 GNU GPL 第 3 版发布，不提供任何担保。完整对应源码与程序一同提供。\r\n下载组件：Downloader 3.1.2 · Behzad Khosravifar · MIT\r\nhttps://github.com/bezzad/Downloader\r\n许可见 Downloader-LICENSE.txt。\r\n图标来源：Icons8，https://icons8.com，CC BY-ND 3.0。\r\n\r\n默认仅下载；可主动启用下载后后台静默安装，需管理员权限，不自动重启。可选开启驱动更新保护，仅排除质量更新中的驱动，不关闭系统安全更新。\r\n历史版本仅限 Windows 更新源返回的适用候选，无法保证完整。\r\n\r\n");
+            string legal = UiLanguageService.Get("WuMgr 驱动下载中心 10.0.1 Preview · 中英文修改版\r\n原项目：Copyright © DavidXanatos 2018-2020\r\n上游：https://github.com/DavidXanatos/wumgr\r\n本修改版依据 GNU GPL 第 3 版发布，不提供任何担保。完整对应源码与程序一同提供。\r\n下载组件：Downloader 3.1.2 · Behzad Khosravifar · MIT\r\nhttps://github.com/bezzad/Downloader\r\n许可见 Downloader-LICENSE.txt。\r\n图标来源：Icons8，https://icons8.com，CC BY-ND 3.0。\r\n\r\n默认仅下载；可主动启用下载后后台静默安装，需管理员权限，不自动重启。可选开启驱动更新保护，仅排除质量更新中的驱动，不关闭系统安全更新。\r\n历史版本包含 Windows 更新源和微软目录候选，目录项仅供核验，不代表安装适用性保证。\r\n\r\n");
             try { legal += File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LICENSE")); } catch { legal += UiLanguageService.Get("完整许可证参见源码根目录 LICENSE：https://www.gnu.org/licenses/gpl-3.0.html"); } ShowText(UiLanguageService.Get("关于与许可证"), legal);
         }
         void LoadDemo()
@@ -337,13 +353,13 @@ namespace wumgr
         {
             using (var graphics = Graphics.FromHwnd(IntPtr.Zero)) scale = graphics.DpiX / 96F;
             device = d; choice = current; isExpanded = showHistory; installedOffset = d.LocalDevice == null ? 0 : 46; AccessibleName = d.Model + "，" + UiLanguageService.Get("驱动号  ") + current.Version; AccessibleDescription = UiLanguageService.Get("厂商") + " " + d.Manufacturer + "，" + UiLanguageService.Get("日期") + " " + DriverTheme.Date(current) + "，" + DriverTheme.Size(current.Size); Margin = new Padding(0, 0, 0, S(12)); Height = S((showHistory ? 151 + d.Versions.Count * 40 : 108) + installedOffset);
-            check.Checked = isChecked; check.Enabled = current.DownloadUrls.Count > 0; check.AccessibleName = UiLanguageService.Get("选择 ") + d.Model; check.Bounds = R(18, 39, 22, 25); Controls.Add(check); check.CheckedChanged += (s, e) => { if (CheckChanged != null) CheckChanged(check.Checked); };
+            check.Checked = isChecked; check.Enabled = current.CanDownload; check.AccessibleName = UiLanguageService.Get("选择 ") + d.Model; check.Bounds = R(18, 39, 22, 25); Controls.Add(check); check.CheckedChanged += (s, e) => { if (CheckChanged != null) CheckChanged(check.Checked); };
             versions = new SoftButton((showHistory ? UiLanguageService.Get("收起版本") + "  ∧" : d.Versions.Count > 1 ? UiLanguageService.Get("历史版本") + "  ∨" : UiLanguageService.Get("查看版本") + "  ∨") + "  " + d.Versions.Count); Controls.Add(versions); versions.Click += (s, e) => { if (ToggleHistory != null) ToggleHistory(); };
-            get = new SoftButton(UiLanguageService.Get("下载此版本"), true) { Enabled = !demo && current.DownloadUrls.Count > 0 }; Controls.Add(get); get.Click += async (s, e) => { if (Download != null) await Download(); };
+            get = new SoftButton(UiLanguageService.Get("下载此版本"), true) { Enabled = !demo && current.CanDownload }; Controls.Add(get); get.Click += async (s, e) => { if (Download != null) await Download(); };
             info = new SoftButton(UiLanguageService.Get("详情")); Controls.Add(info); info.Click += (s, e) => { if (ShowInfo != null) ShowInfo(); };
             if (showHistory) foreach (var v in d.Versions)
             {
-                var radio = new SoftRadioButton { Checked = Object.ReferenceEquals(v, current), AutoSize = false, Text = "", Enabled = v.DownloadUrls.Count > 0, AccessibleName = UiLanguageService.Get("选择驱动版本 ") + v.Version, Tag = v };
+                var radio = new SoftRadioButton { Checked = Object.ReferenceEquals(v, current), AutoSize = false, Text = "", Enabled = v.CanDownload, AccessibleName = UiLanguageService.Get("选择驱动版本 ") + v.Version, Tag = v };
                 radio.BackColor = Object.ReferenceEquals(v, current) ? DriverTheme.Pale : Color.FromArgb(248, 251, 249); radios.Add(radio); Controls.Add(radio); radio.CheckedChanged += (s, e) => { if (radio.Checked && Choose != null) Choose(v); };
             }
             tips.SetToolTip(this, (d.LocalDevice == null ? "" : d.LocalDevice.InstanceId + "\n" + UiLanguageService.T("已安装版本：", "Installed version: ") + d.LocalDevice.InstalledVersion + "\n") + d.Model + UiLanguageService.Get("\n当前驱动号：") + current.Version + UiLanguageService.Get("\n硬件标识：") + current.HardwareId);
@@ -418,7 +434,7 @@ namespace wumgr
                     DriverTheme.Text(g, v.Version, Object.ReferenceEquals(v, choice) ? selectedFont : versionFont, Object.ReferenceEquals(v, choice) ? accent : ink, R(71, y, versionWidth, 36));
                     DriverTheme.Text(g, DriverTheme.Date(v), f, muted, R(dateX, y, sizeX - dateX, 36));
                     DriverTheme.Text(g, DriverTheme.Size(v.Size), f, muted, R(sizeX, y, noteX - sizeX, 36));
-                    Version parsed; string note = v.DownloadUrls.Count == 0 ? UiLanguageService.Get("无可用下载地址") : i == 0 && Version.TryParse(v.Version, out parsed) ? UiLanguageService.Get("列表最高版本 · 非安装建议") : v.Superseded ? UiLanguageService.Get("已被取代候选 · 请核验") : i > 0 ? UiLanguageService.Get("历史候选 · 安装前请核验") : UiLanguageService.Get("版本未明确 · 请核验详情");
+                    Version parsed; string note = !v.CanDownload ? UiLanguageService.Get("无可用下载地址") : i == 0 && Version.TryParse(v.Version, out parsed) ? UiLanguageService.Get("列表最高版本 · 非安装建议") : v.Superseded ? UiLanguageService.Get("已被取代候选 · 请核验") : i > 0 ? UiLanguageService.Get("历史候选 · 安装前请核验") : UiLanguageService.Get("版本未明确 · 请核验详情");
                     DriverTheme.Text(g, note, f, i == 0 ? accent : muted, R(noteX, y, w - noteX - 22, 36));
                 }
             }
